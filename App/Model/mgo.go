@@ -1,35 +1,36 @@
 package model
 
 import (
-	"github.com/XMatrixStudio/icecream/config"
 	"github.com/globalsign/mgo"
 )
 
+// Mongo 数据库配置
 type Mongo struct {
 	Host     string
 	Port     string
 	User     string
 	Password string
-	Dbname   string
+	Name     string
 }
 
-type model struct {
-	DB *mgo.Database
-}
+// DB 数据库连接
+var DB *mgo.Database
 
-func NewModel()
-
+// InitMongo 初始化数据库
 func InitMongo(conf Mongo) error {
+	if DB != nil {
+		DB.Session.Close()
+	}
 	session, err := mgo.Dial(
 		"mongodb://" +
 			conf.User +
 			":" + conf.Password +
 			"@" + conf.Host +
 			":" + conf.Port +
-			"/" + conf.Dbname)
+			"/" + conf.Name)
 	if err != nil {
 		return err
 	}
-	DB = session.DB(config.Mongo.Name)
+	DB = session.DB(conf.Name)
 	return nil
 }
