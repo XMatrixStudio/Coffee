@@ -1,7 +1,9 @@
-package main
+package coffee
 
-import "fmt"
+import (
+	"fmt"
+)
 
-func main() {
+func RunServer() {
 	fmt.Println("Hello, world!")
 }
