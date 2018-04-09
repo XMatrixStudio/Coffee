@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/XMatrixStudio/icecream/config"
 	"github.com/globalsign/mgo"
 )
 
@@ -12,11 +13,23 @@ type Mongo struct {
 	Dbname   string
 }
 
-var DB *mgo.Database
+type model struct {
+	DB *mgo.Database
+}
 
-func InitMongo() error {
-	session, err := mgo.Dial("mongodb://")
+func NewModel()
 
-	session.Close()
-	return err
+func InitMongo(conf Mongo) error {
+	session, err := mgo.Dial(
+		"mongodb://" +
+			conf.User +
+			":" + conf.Password +
+			"@" + conf.Host +
+			":" + conf.Port +
+			"/" + conf.Dbname)
+	if err != nil {
+		return err
+	}
+	DB = session.DB(config.Mongo.Name)
+	return nil
 }
