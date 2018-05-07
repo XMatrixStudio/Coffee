@@ -1,7 +1,9 @@
 package model
 
 import (
-	"github.com/globalsign/mgo"
+	"fmt"
+
+	"gopkg.in/mgo.v2"
 )
 
 // Mongo 数据库配置
@@ -32,5 +34,14 @@ func InitMongo(conf Mongo) error {
 		return err
 	}
 	DB = session.DB(conf.Name)
+	UserDB = DB.C("users")
+	ContentDB = DB.C("contents")
+	CommentDB = DB.C("comments")
+	ContentLikeDB = DB.C("like")
+	CommentLikeDB = DB.C("commentLike")
+	UserLikeDB = DB.C("userLike")
+	NotificationDB = DB.C("notifications")
+	TagDB = DB.C("tags")
+	fmt.Println("MongoDB Connect Success!")
 	return nil
 }

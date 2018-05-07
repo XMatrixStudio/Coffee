@@ -8,7 +8,7 @@ import (
 
 // Config 配置文件
 type Config struct {
-	Mongo  model.Mongo  // mongodb配置
+	Mongo  model.Mongo  // mongoDB配置
 	Server ServerConfig // iris配置
 }
 
