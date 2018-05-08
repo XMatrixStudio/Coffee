@@ -9,31 +9,52 @@ import (
 )
 
 // Content 内容
+/* 类型列表
+- Movie 电影
+- Album 相册
+- App 应用
+ - Android
+ - Windows
+ - IOS
+ - Linux
+- Game 游戏
+ - Android
+ - Windows
+ - IOS
+- Docs 文档
+- Music 音乐
+- Daily 日记/随笔
+*/
 type Content struct {
-	ID          bson.ObjectId `bson:"_id"`
-	Name        string        `bson:"name"`        // 内容名字
-	Detail      string        `bson:"detail"`      // 详情介绍
-	OwnID       string        `bson:"ownId"`       // 作者ID
-	PublishDate int64         `bson:"publishDate"` // 发布日期
-	EditDate    int64         `bson:"editDate"`    // 修改日期
-	LikeNum     int64         `bson:"likeNum"`     // 点赞人数
-	CommentNum  int64         `bson:"commentNum"`  // 评论次数
-	ReadNum     int64         `bson:"readNum"`     // 阅读次数
-	Top         bool          `bson:"top"`         // 是否置顶
-	Public      bool          `bson:"public"`      // 是否公开
-	Comment     bool          `bson:"comment"`     // 是否开放评论
-	Type        string        `bson:"type"`        // 类型， "Movie", "Data", "Picture"， "Doc", "App", "Log", "Daily"
-	Local       bool          `bson:"local"`       // 是否本地资源
-	File        content.File  `bson:"file"`        // 文件系统
-	Image       string        `bson:"image"`       // 预览图URL
-	Tag         []string      `bson:"tag"`         // 标签
+	ID          bson.ObjectId   `bson:"_id"`
+	Name        string          `bson:"name"`        // 内容名字
+	Detail      string          `bson:"detail"`      // 详情介绍
+	OwnID       string          `bson:"ownId"`       // 作者ID
+	PublishDate int64           `bson:"publishDate"` // 发布日期
+	EditDate    int64           `bson:"editDate"`    // 修改日期
+	LikeNum     int64           `bson:"likeNum"`     // 点赞人数
+	CommentNum  int64           `bson:"commentNum"`  // 评论次数
+	ReadNum     int64           `bson:"readNum"`     // 阅读次数
+	Top         bool            `bson:"top"`         // 是否置顶
+	Public      bool            `bson:"public"`      // 是否公开
+	Comment     bool            `bson:"comment"`     // 是否开放评论
+	Type        []string        `bson:"type"`        // 类型， "Movie", "Data", "Album"， "Docs", "App", "Daily"
+	SubType     string          `bson:"subType"`     // 子类型 (如 "app"-"android", "windows")
+	Local       bool            `bson:"local"`       // 是否本地资源
+	Image       []content.Image `bson:"image"`       // 预览图
+	Tag         []string        `bson:"tag"`         // 标签（ObjectId）
+	Remarks     string          `bson:"remark"`      // 备注
+	Files       []content.File  `bson:"append"`      // 文件集合
+	Movie       content.Movie   `bson:"movie"`       // Movie类型专属
+	Album       content.Album   `bson:"album"`       // Album类型专属
+	App         content.App     `bson:"app"`         // App/Game类型专属
 }
 
 // ContentDB 内容数据库
 var ContentDB *mgo.Collection
 
 // AddContent 增加内容
-func AddContent(name, detail, contentType, userID string, isComment bool) (bson.ObjectId, error) {
+func AddContent(name, detail, userID string, contentType []string, isComment bool) (bson.ObjectId, error) {
 	newContent := bson.NewObjectId()
 	err := ContentDB.Insert(&Content{
 		ID:          newContent,
