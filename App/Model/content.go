@@ -44,7 +44,7 @@ type Content struct {
 	Image       []content.Image `bson:"image"`       // 预览图
 	Tag         []string        `bson:"tag"`         // 标签（ObjectId）
 	Remarks     string          `bson:"remark"`      // 备注
-	Files       []content.File  `bson:"append"`      // 文件集合
+	Files       []content.File  `bson:"append"`      // 文件集合 (可以用于存储电影字幕，软件附件等)
 	Movie       content.Movie   `bson:"movie"`       // Movie类型专属
 	Album       content.Album   `bson:"album"`       // Album类型专属
 	App         content.App     `bson:"app"`         // App/Game类型专属
