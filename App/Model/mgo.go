@@ -3,7 +3,7 @@ package model
 import (
 	"fmt"
 
-	"gopkg.in/mgo.v2"
+	"github.com/globalsign/mgo"
 )
 
 // Mongo 数据库配置
