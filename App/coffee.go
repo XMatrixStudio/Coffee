@@ -3,7 +3,7 @@ package coffee
 import (
 	"github.com/kataras/iris"
 
-	model "github.com/XMatrixStudio/Coffee/App/model"
+	model "github.com/XMatrixStudio/Coffee/app/models"
 )
 
 // Config 配置文件

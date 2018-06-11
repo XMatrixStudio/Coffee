@@ -1,4 +1,4 @@
-package model
+package models
 
 // Album 相册
 type Album struct {
