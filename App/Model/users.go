@@ -5,6 +5,18 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
+// 用户类型
+const (
+	ClassBlackUser int = iota
+	ClassLimitUser
+	ClassNormalUser
+	ClassVerifyUser
+	ClassVIPUser
+	ClassSVIPUser
+	ClassAdmin
+	ClassSAdmin
+)
+
 // Users 用户基本信息
 /*
 Class 用户类型
@@ -38,11 +50,11 @@ Class 用户类型
 
 Size 存储库分配
 - 认证用户
- - 最大32G， 单个8G
+ - 最大8G， 单个2G
 - VIP用户 - 高级用户
- - 最大512G， 单个128G
+ - 最大128G， 单个8G
 - VIP用户 - 超级用户
- - 最大2048G， 单个256G
+ - 最大1024G， 单个128G
 - 管理员
  - 无上限
 - 超级管理员
@@ -60,6 +72,13 @@ type Users struct {
 	SingleSize int64         `bson:"singleSize"` // 单个资源最大上限 -1为无上限
 	FilesClass []string      `bson:"filesClass"` // 文件分类
 }
+
+// 性别
+const (
+	GenderMan int = iota
+	GenderWoman
+	GenderUnknown
+)
 
 // UserInfo 用户个性信息
 type UserInfo struct {

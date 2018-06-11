@@ -1,18 +1,18 @@
 package model
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/globalsign/mgo"
 )
 
 // Mongo 数据库配置
 type Mongo struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	Name     string
+	Host     string `yaml:"Host"`
+	Port     string `yaml:"Port"`
+	User     string `yaml:"User"`
+	Password string `yaml:"Password"`
+	Name     string `yaml:"Name"`
 }
 
 // DB 数据库连接
@@ -42,6 +42,6 @@ func InitMongo(conf Mongo) error {
 	UserLikeDB = DB.C("userLike")
 	NotificationDB = DB.C("notifications")
 	TagDB = DB.C("tags")
-	fmt.Println("MongoDB Connect Success!")
+	log.Printf("MongoDB Connect Success!")
 	return nil
 }
