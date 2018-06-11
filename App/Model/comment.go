@@ -10,66 +10,97 @@ import (
 // Comment 评论
 type Comment struct {
 	ID        bson.ObjectId `bson:"_id"`
-	ArticleID string        `bson:"articleId"` // 文章ID 【索引】
+	ContentID string        `bson:"contentId"` // 文章ID 【索引】
 	UserID    string        `bson:"userId"`    // 评论用户ID 【索引】
 	Date      int64         `bson:"date"`      // 发布时间
 	Content   string        `bson:"content"`   // 评论内容
-	FatherID  string        `bson:"fatherId"`  // 父评论ID
 	LikeNum   int64         `bson:"likeNum"`   // 点赞数
-	Top       bool          `bson:"top"`       // 是否置顶
+}
+
+// Reply 评论的回复
+type Reply struct {
+	ID        bson.ObjectId `bson:"_id"`
+	CommentID string        `bson:"commentId"` // 父评论ID序列
+	UserID    string        `bson:"userId"`    // 评论用户ID
+	FatherID  string        `bson:"fatherId"`  // 被评论用户ID
+	Date      int64         `bson:"date"`      // 发布时间
+	Content   string        `bson:"content"`   // 评论内容
+	LikeNum   int64         `bson:"likeNum"`   // 点赞数
 }
 
 // CommentDB 评论数据库
 var CommentDB *mgo.Collection
 
+// ReplyDB 回复数据库
+var ReplyDB *mgo.Collection
+
 // AddComment 增加评论
-func AddComment(article, user, content, fatherID string) (bson.ObjectId, error) {
+func AddComment(contentID, userID, content, fatherID string) (bson.ObjectId, error) {
 	newComment := bson.NewObjectId()
-	err := CommentDB.Insert(&Comment{
-		ID:        newComment,
-		ArticleID: article,
-		UserID:    user,
-		Content:   content,
-		FatherID:  fatherID,
-		Date:      time.Now().Unix() * 1000,
-	})
-	if err != nil {
-		return "", err
+	if fatherID == "" {
+		err := CommentDB.Insert(&Comment{
+			ID:        newComment,
+			ContentID: contentID,
+			UserID:    userID,
+			Content:   content,
+			Date:      time.Now().Unix() * 1000,
+		})
+		if err != nil {
+			return "", err
+		}
+	} else {
+		err := ReplyDB.Insert(&Reply{
+			ID:       newComment,
+			FatherID: fatherID,
+			UserID:   userID,
+			Content:  content,
+			Date:     time.Now().Unix() * 1000,
+		})
+		if err != nil {
+			return "", err
+		}
 	}
 	return newComment, nil
 }
 
 // AddLike 点赞 1或-1
-func AddLike(id string, num int) error {
-	_, err := CommentDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"likeNum": num}})
-	return err
-}
-
-// SetTop 设置是否置顶
-func SetTop(id string, status bool) error {
-	_, err := CommentDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"top": status}})
-	return err
+func AddLike(id string, isReply bool, num int) (err error) {
+	if isReply {
+		_, err = ReplyDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"likeNum": num}})
+	} else {
+		_, err = CommentDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"likeNum": num}})
+	}
+	return
 }
 
 // RemoveComment 删除评论
-func RemoveComment(id string) error {
-	_, err := CommentDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"content": ""}})
-	return err
+func RemoveComment(id string, isReply bool) (err error) {
+	if isReply {
+		_, err = ReplyDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"content": ""}})
+	} else {
+		_, err = CommentDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"content": ""}})
+	}
+	return
 }
 
 // GetCommentByContentID 获取内容指定页数的评论
-func GetCommentByContentID(id string, eachNum, pageNum int) []Comment {
-	var comment []Comment
+func GetCommentByContentID(id string, eachNum, pageNum int) (comment []Comment) {
 	err := CommentDB.Find(nil).Sort("-date").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&comment)
 	if err != nil {
 		return nil
 	}
-	return comment
+	return
+}
+
+// GetReplyByCommentID 获取指定ID评论的回复
+func GetReplyByCommentID(id string) (reply []Reply) {
+	ReplyDB.Find(bson.M{"fatherId": id}).All(&reply)
+	return
 }
 
 // GetCommentPage 获取评论数目
 func GetCommentPage(id string) (count int) {
-	count, err := CommentDB.FindId(bson.ObjectIdHex(id)).Count()
+	count, err := CommentDB.Find(bson.M{"contentId": id}).Count()
 	if err != nil {
 		count = -1
 	}

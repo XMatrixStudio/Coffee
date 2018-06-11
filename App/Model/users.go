@@ -49,16 +49,17 @@ Size 存储库分配
  - 无上限
 */
 type Users struct {
-	ID         bson.ObjectId `bson:"_id"`        // 用户ID
-	Name       string        `bson:"name"`       // 用户唯一名字
-	Class      int           `bson:"class"`      // 用户类型
-	Info       UserInfo      `bson:"info"`       // 用户个性信息
-	LikeNum    int64         `bson:"likeNum"`    // 收到的点赞数
-	Token      string        `bson:"token"`      // Violet 访问令牌
-	MaxSize    int64         `bson:"maxSize"`    // 存储库使用最大上限 -1为无上限 单位为KB
-	UsedSize   int64         `bson:"usedSize"`   // 存储库已用大小 单位为KB
-	SingleSize int64         `bson:"singleSize"` // 单个资源最大上限 -1为无上限
-	FilesClass []string      `bson:"filesClass"` // 文件分类
+	ID           bson.ObjectId `bson:"_id"`          // 用户ID
+	Name         string        `bson:"name"`         // 用户唯一名字
+	Class        int           `bson:"class"`        // 用户类型
+	Info         UserInfo      `bson:"info"`         // 用户个性信息
+	LikeNum      int64         `bson:"likeNum"`      // 收到的点赞数
+	Token        string        `bson:"token"`        // Violet 访问令牌
+	MaxSize      int64         `bson:"maxSize"`      // 存储库使用最大上限 -1为无上限 单位为KB
+	UsedSize     int64         `bson:"usedSize"`     // 存储库已用大小 单位为KB
+	SingleSize   int64         `bson:"singleSize"`   // 单个资源最大上限 -1为无上限
+	FilesClass   []string      `bson:"filesClass"`   // 文件分类
+	ContentCount int64         `bson:"contentCount"` // 内容数量
 }
 
 // UserInfo 用户个性信息
@@ -93,22 +94,21 @@ func AddUser() (bson.ObjectId, error) {
 }
 
 // SetUserInfo 设置用户信息
-func SetUserInfo(id string, info UserInfo) error {
-	data := bson.M{"$set": info}
-	_, err := UserDB.UpsertId(bson.ObjectIdHex(id), data)
-	return err
+func SetUserInfo(id string, info UserInfo) (err error) {
+	_, err = UserDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": info})
+	return
 }
 
 // SetUserName 设置用户名
-func SetUserName(id, name string) error {
-	_, err := UserDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"name": name}})
-	return err
+func SetUserName(id, name string) (err error) {
+	_, err = UserDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"name": name}})
+	return
 }
 
 // SetUserClass 设置用户类型
-func SetUserClass(id, class string) error {
-	_, err := UserDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"class": class}})
-	return err
+func SetUserClass(id, class string) (err error) {
+	_, err = UserDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"class": class}})
+	return
 }
 
 // GetUserByID 根据ID查询用户
