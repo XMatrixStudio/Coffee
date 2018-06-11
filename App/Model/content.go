@@ -75,9 +75,9 @@ func AddContent(name, detail, userID, contentType string) (bson.ObjectId, error)
 }
 
 // RemoveContent 删除内容
-func RemoveContent(id string) error {
-	err := ContentDB.RemoveId(bson.ObjectIdHex(id))
-	return err
+func RemoveContent(id string) (err error) {
+	err = ContentDB.RemoveId(bson.ObjectIdHex(id))
+	return
 }
 
 // GetContentByID 根据ID查询内容
@@ -91,9 +91,9 @@ func GetContentByID(id string) *Content {
 }
 
 // UpdateByID 根据ID更新内容
-func UpdateByID(id string, data Content) error {
-	err := ContentDB.UpdateId(bson.ObjectIdHex(id), &data)
-	return err
+func UpdateByID(id string, data Content) (err error) {
+	err = ContentDB.UpdateId(bson.ObjectIdHex(id), &data)
+	return
 }
 
 // GetContentByOwn 根据作者ID查询内容
@@ -107,11 +107,11 @@ func GetContentByOwn(id string) []Content {
 }
 
 // GetPageContent 获取内容指定分页内容集合
-/* func GetPageContent(ownID, contentType, subType string, eachNum, pageNum int) []Content {
+func GetPageContent(ownID, contentType, subType string, eachNum, pageNum int) []Content {
 	var content []Content
 	err := ContentDB.Find(nil).Sort("-editDate").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&content)
 	if err != nil {
 		return nil
 	}
 	return content
-} */
+}

@@ -1,3 +1,2 @@
 # Coffee
-
-A Community system based on Violet
+A Content Manger System based on Violet

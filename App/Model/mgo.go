@@ -37,6 +37,7 @@ func InitMongo(conf Mongo) error {
 	UserDB = DB.C("users")
 	ContentDB = DB.C("contents")
 	CommentDB = DB.C("comments")
+	ReplyDB = DB.C("reply")
 	ContentLikeDB = DB.C("like")
 	CommentLikeDB = DB.C("commentLike")
 	UserLikeDB = DB.C("userLike")
