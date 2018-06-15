@@ -1,2 +1,4 @@
 Config/*
-Coffee.exe
+*.exe
+*.yaml
+.idea/*

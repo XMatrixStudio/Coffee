@@ -90,13 +90,15 @@ type UserInfo struct {
 	NikeName string `bson:"nikeName"` // 昵称
 }
 
-// UserDB 数据库连接
-var UserDB *mgo.Collection
+// UserModel 用户数据库
+type UserModel struct {
+	DB *mgo.Collection
+}
 
 // AddUser 添加用户
-func AddUser() (bson.ObjectId, error) {
+func (m *UserModel) AddUser() (bson.ObjectId, error) {
 	newUser := bson.NewObjectId()
-	err := UserDB.Insert(&Users{
+	err := m.DB.Insert(&Users{
 		ID:         newUser,
 		Name:       "user_" + string(newUser),
 		Class:      0,
@@ -105,35 +107,36 @@ func AddUser() (bson.ObjectId, error) {
 	if err != nil {
 		return "", err
 	}
-	err = InitNotification(string(newUser))
+	// 交给Service层初始化
+	/* err = InitNotification(string(newUser))
 	if err != nil {
 		return "", err
-	}
+	} */
 	return newUser, nil
 }
 
 // SetUserInfo 设置用户信息
-func SetUserInfo(id string, info UserInfo) (err error) {
-	_, err = UserDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": info})
+func (m *UserModel) SetUserInfo(id string, info UserInfo) (err error) {
+	_, err = m.DB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": info})
 	return
 }
 
 // SetUserName 设置用户名
-func SetUserName(id, name string) (err error) {
-	_, err = UserDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"name": name}})
+func (m *UserModel) SetUserName(id, name string) (err error) {
+	_, err = m.DB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"name": name}})
 	return
 }
 
 // SetUserClass 设置用户类型
-func SetUserClass(id, class string) (err error) {
-	_, err = UserDB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"class": class}})
+func (m *UserModel) SetUserClass(id, class string) (err error) {
+	_, err = m.DB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"class": class}})
 	return
 }
 
 // GetUserByID 根据ID查询用户
-func GetUserByID(id string) (*Users, error) {
+func (m *UserModel) GetUserByID(id string) (*Users, error) {
 	user := new(Users)
-	err := UserDB.FindId(id).One(&user)
+	err := m.DB.FindId(id).One(&user)
 	if err != nil {
 		return nil, err
 	}

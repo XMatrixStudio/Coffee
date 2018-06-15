@@ -20,13 +20,15 @@ type NotificationDetail struct {
 	Type    string        `bson:"type"`    // 类型： "system", "like", "reply"...
 }
 
-// NotificationDB 通知数据库
-var NotificationDB *mgo.Collection
+// NotificationModel 通知数据库
+type NotificationModel struct {
+	DB *mgo.Collection
+}
 
 // InitNotification 初始化用户通知
-func InitNotification(user string) error {
+func (m *NotificationModel) InitNotification(user string) error {
 	newNotification := bson.NewObjectId()
-	err := NotificationDB.Insert(&Notification{
+	err := m.DB.Insert(&Notification{
 		ID:     newNotification,
 		UserID: user,
 	})
@@ -34,39 +36,39 @@ func InitNotification(user string) error {
 }
 
 // AddNotification 添加一条通知 类型:"system", "like", "reply" ...
-func AddNotification(content, user, notificationType string) error {
+func (m *NotificationModel) AddNotification(content, user, notificationType string) error {
 	newNotification := &NotificationDetail{
 		ID:      bson.NewObjectId(),
 		Content: content,
 		Read:    false,
 		Type:    notificationType,
 	}
-	err := NotificationDB.Update(
+	err := m.DB.Update(
 		bson.M{"userId": bson.ObjectIdHex(user)},
 		bson.M{"$push": bson.M{"notifications": &newNotification}})
 	return err
 }
 
 // ReadANotification 标记通知
-func ReadANotification(user, id string, status bool) error {
-	err := NotificationDB.Update(
+func (m *NotificationModel) ReadANotification(user, id string, status bool) error {
+	err := m.DB.Update(
 		bson.M{"userId": bson.ObjectIdHex(user), "notifications._id": id},
 		bson.M{"$set": bson.M{"notifications.$.read": status}})
 	return err
 }
 
 // RemoveANotification 删除通知
-func RemoveANotification(user, id string) error {
-	err := NotificationDB.Update(
+func (m *NotificationModel) RemoveANotification(user, id string) error {
+	err := m.DB.Update(
 		bson.M{"userId": bson.ObjectIdHex(user), "notifications._id": id},
 		bson.M{"$pull": bson.M{"notifications._id": id}})
 	return err
 }
 
 // GetNotificationsByUser 获取用户所有通知
-func GetNotificationsByUser(user string) ([]NotificationDetail, error) {
+func (m *NotificationModel) GetNotificationsByUser(user string) ([]NotificationDetail, error) {
 	var notifications []NotificationDetail
-	err := NotificationDB.Find(nil).All(notifications)
+	err := m.DB.Find(nil).All(notifications)
 	if err != nil {
 		return nil, err
 	}

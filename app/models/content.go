@@ -49,13 +49,15 @@ type Content struct {
 	App         App           `bson:"app"`         // App/Game类型专属
 }
 
-// ContentDB 内容数据库
-var ContentDB *mgo.Collection
+// CommentModel 内容数据库
+type ContentModel struct {
+	DB *mgo.Collection
+}
 
 // AddContent 增加内容
-func AddContent(name, detail, userID, contentType string) (bson.ObjectId, error) {
+func (m *ContentModel) AddContent(name, detail, userID, contentType string) (bson.ObjectId, error) {
 	newContent := bson.NewObjectId()
-	err := ContentDB.Insert(&Content{
+	err := m.DB.Insert(&Content{
 		ID:          newContent,
 		Name:        name,
 		Detail:      detail,
@@ -75,15 +77,15 @@ func AddContent(name, detail, userID, contentType string) (bson.ObjectId, error)
 }
 
 // RemoveContent 删除内容
-func RemoveContent(id string) (err error) {
-	err = ContentDB.RemoveId(bson.ObjectIdHex(id))
+func (m *ContentModel) RemoveContent(id string) (err error) {
+	err = m.DB.RemoveId(bson.ObjectIdHex(id))
 	return
 }
 
 // GetContentByID 根据ID查询内容
-func GetContentByID(id string) *Content {
+func (m *ContentModel) GetContentByID(id string) *Content {
 	content := new(Content)
-	err := ContentDB.FindId(id).One(&content)
+	err := m.DB.FindId(id).One(&content)
 	if err != nil {
 		return nil
 	}
@@ -91,15 +93,15 @@ func GetContentByID(id string) *Content {
 }
 
 // UpdateByID 根据ID更新内容
-func UpdateByID(id string, data Content) (err error) {
-	err = ContentDB.UpdateId(bson.ObjectIdHex(id), &data)
+func (m *ContentModel) UpdateByID(id string, data Content) (err error) {
+	err = m.DB.UpdateId(bson.ObjectIdHex(id), &data)
 	return
 }
 
 // GetContentByOwn 根据作者ID查询内容
-func GetContentByOwn(id string) []Content {
+func (m *ContentModel) GetContentByOwn(id string) []Content {
 	var content []Content
-	err := ContentDB.Find(bson.M{"ownId": id}).All(&content)
+	err := m.DB.Find(bson.M{"ownId": id}).All(&content)
 	if err != nil {
 		return nil
 	}
@@ -107,9 +109,9 @@ func GetContentByOwn(id string) []Content {
 }
 
 // GetPageContent 获取内容指定分页内容集合
-func GetPageContent(ownID, contentType, subType string, eachNum, pageNum int) []Content {
+func (m *ContentModel) GetPageContent(ownID, contentType, subType string, eachNum, pageNum int) []Content {
 	var content []Content
-	err := ContentDB.Find(nil).Sort("-editDate").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&content)
+	err := m.DB.Find(nil).Sort("-editDate").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&content)
 	if err != nil {
 		return nil
 	}

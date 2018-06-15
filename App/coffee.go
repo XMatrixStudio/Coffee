@@ -3,13 +3,21 @@ package coffee
 import (
 	"github.com/kataras/iris"
 
-	model "github.com/XMatrixStudio/Coffee/app/models"
+	"time"
+
+	"github.com/XMatrixStudio/Coffee/app/controllers"
+	"github.com/XMatrixStudio/Coffee/app/models"
+	"github.com/XMatrixStudio/Coffee/app/services"
+	"github.com/XMatrixStudio/Violet.SDK.Go"
+	"github.com/kataras/iris/mvc"
+	"github.com/kataras/iris/sessions"
 )
 
 // Config 配置文件
 type Config struct {
-	Mongo  model.Mongo  `yaml:"Mongo"`  // mongoDB配置
-	Server ServerConfig `yaml:"Server"` // iris配置
+	Mongo  models.Mongo     `yaml:"Mongo"`  // mongoDB配置
+	Server ServerConfig     `yaml:"Server"` // iris配置
+	Violet violetSdk.Config `yaml:"Violet"` // Violet配置
 }
 
 // ServerConfig 服务器配置
@@ -21,11 +29,33 @@ type ServerConfig struct {
 
 // RunServer 开始运行服务
 func RunServer(c Config) {
-	model.InitMongo(c.Mongo) // 初始化数据库
+	// 初始化数据库
+	Model, err := models.NewModel(c.Mongo)
+	if err != nil {
+		panic(err)
+	}
+	// 初始化服务
+	Service := services.NewService(Model)
+	userService := Service.NewUserService()
+	userService.InitViolet(c.Violet)
+
+	// 启动服务器
 	app := iris.New()
 	if c.Server.Dev {
 		app.Logger().SetLevel("debug")
 	}
+
+	sessManager := sessions.New(sessions.Config{
+		Cookie:  "sessionBug",
+		Expires: 24 * time.Hour,
+	})
+
+	// "/users" based mvc application.
+	users := mvc.New(app.Party("/users"))
+	// Bind the "userService" to the UserController's Service (interface) field.
+	users.Register(userService, sessManager.Start)
+	users.Handle(new(controllers.UsersController))
+
 	app.Run(
 		// Starts the web server
 		iris.Addr(c.Server.Host+":"+c.Server.Port),

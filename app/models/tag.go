@@ -12,7 +12,7 @@ type Tag struct {
 	Count int64         `bson:"count"` // 【索引】 使用该标签的资源数 用于排序
 }
 
-var (
-	// TagDB 标签数据库
-	TagDB *mgo.Collection
-)
+// TagModel 标签数据库
+type TagModel struct {
+	DB *mgo.Collection
+}
