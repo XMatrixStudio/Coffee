@@ -7,7 +7,7 @@ import (
 
 // 用户类型
 const (
-	ClassBlackUser int = iota
+	ClassBlackUser  int = iota
 	ClassLimitUser
 	ClassNormalUser
 	ClassVerifyUser
@@ -62,7 +62,9 @@ Size 存储库分配
 */
 type Users struct {
 	ID           bson.ObjectId `bson:"_id"`          // 用户ID
-	Name         string        `bson:"name"`         // 用户唯一名字
+	VioletID     bson.ObjectId `bson:"vid"`          // VioletID
+	Email        string        `bson:"email"`        // 用户唯一邮箱
+	Name         string        `bson:"name"`         // 用户昵称
 	Class        int           `bson:"class"`        // 用户类型
 	Info         UserInfo      `bson:"info"`         // 用户个性信息
 	LikeNum      int64         `bson:"likeNum"`      // 收到的点赞数
@@ -76,18 +78,16 @@ type Users struct {
 
 // 性别
 const (
-	GenderMan int = iota
+	GenderMan     int = iota
 	GenderWoman
 	GenderUnknown
 )
 
 // UserInfo 用户个性信息
 type UserInfo struct {
-	Avatar   string `bson:"avatar"`   // 头像URL
-	Bio      string `bson:"bio"`      // 个人简介
-	Email    string `bson:"email"`    // 邮箱
-	Gender   int    `bson:"gender"`   // 性别
-	NikeName string `bson:"nikeName"` // 昵称
+	Avatar string `bson:"avatar"` // 头像URL
+	Bio    string `bson:"bio"`    // 个人简介
+	Gender int    `bson:"gender"` // 性别
 }
 
 // UserModel 用户数据库
@@ -96,13 +96,21 @@ type UserModel struct {
 }
 
 // AddUser 添加用户
-func (m *UserModel) AddUser() (bson.ObjectId, error) {
+func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender int) (bson.ObjectId, error) {
 	newUser := bson.NewObjectId()
 	err := m.DB.Insert(&Users{
 		ID:         newUser,
-		Name:       "user_" + string(newUser),
+		VioletID:   bson.ObjectIdHex(vID),
+		Email:      email,
+		Name:       name,
 		Class:      0,
 		FilesClass: []string{"文档", "图书", "音乐", "代码", "备份", "其他"}, // 默认分类
+		Info: UserInfo{
+			Avatar: avatar,
+			Bio:    bio,
+			Gender: gender,
+		},
+		Token:		token,
 	})
 	if err != nil {
 		return "", err
@@ -134,11 +142,19 @@ func (m *UserModel) SetUserClass(id, class string) (err error) {
 }
 
 // GetUserByID 根据ID查询用户
-func (m *UserModel) GetUserByID(id string) (*Users, error) {
-	user := new(Users)
-	err := m.DB.FindId(id).One(&user)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+func (m *UserModel) GetUserByID(id string) (user Users, err error) {
+	err = m.DB.FindId(bson.ObjectIdHex(id)).One(&user)
+	return
+}
+
+// GetUserByVID 根据VioletID查询用户
+func (m *UserModel) GetUserByVID(id string) (user Users, err error) {
+	err = m.DB.Find(bson.M{"vid": bson.ObjectIdHex(id)}).One(&user)
+	return
+}
+
+// SetUserToken 设置Token
+func (m *UserModel) SetUserToken(id, token string) (err error) {
+	_, err = m.DB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"token": token}})
+	return
 }

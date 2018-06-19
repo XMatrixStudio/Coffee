@@ -1,14 +1,14 @@
 package models
 
 import (
-	mgo "github.com/globalsign/mgo"
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
 
 // Notification 用户通知
 type Notification struct {
 	ID            bson.ObjectId        `bson:"_id"`
-	UserID        string               `bson:"userId"`        // 用户ID 【索引】
+	UserID        bson.ObjectId        `bson:"userId"`        // 用户ID 【索引】
 	Notifications []NotificationDetail `bson:"notifications"` // 通知集合
 }
 
@@ -30,7 +30,7 @@ func (m *NotificationModel) InitNotification(user string) error {
 	newNotification := bson.NewObjectId()
 	err := m.DB.Insert(&Notification{
 		ID:     newNotification,
-		UserID: user,
+		UserID: bson.ObjectIdHex(user),
 	})
 	return err
 }
