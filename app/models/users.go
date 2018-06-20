@@ -7,7 +7,7 @@ import (
 
 // 用户类型
 const (
-	ClassBlackUser  int = iota
+	ClassBlackUser int = iota
 	ClassLimitUser
 	ClassNormalUser
 	ClassVerifyUser
@@ -64,7 +64,6 @@ type Users struct {
 	ID           bson.ObjectId `bson:"_id"`          // 用户ID
 	VioletID     bson.ObjectId `bson:"vid"`          // VioletID
 	Email        string        `bson:"email"`        // 用户唯一邮箱
-	Name         string        `bson:"name"`         // 用户昵称
 	Class        int           `bson:"class"`        // 用户类型
 	Info         UserInfo      `bson:"info"`         // 用户个性信息
 	LikeNum      int64         `bson:"likeNum"`      // 收到的点赞数
@@ -78,13 +77,14 @@ type Users struct {
 
 // 性别
 const (
-	GenderMan     int = iota
+	GenderMan int = iota
 	GenderWoman
 	GenderUnknown
 )
 
 // UserInfo 用户个性信息
 type UserInfo struct {
+	Name   string `bson:"name"`   // 用户昵称
 	Avatar string `bson:"avatar"` // 头像URL
 	Bio    string `bson:"bio"`    // 个人简介
 	Gender int    `bson:"gender"` // 性别
@@ -96,49 +96,33 @@ type UserModel struct {
 }
 
 // AddUser 添加用户
-func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender int) (bson.ObjectId, error) {
-	newUser := bson.NewObjectId()
-	err := m.DB.Insert(&Users{
+func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender int) (newUser bson.ObjectId, err error) {
+	newUser = bson.NewObjectId()
+	err = m.DB.Insert(&Users{
 		ID:         newUser,
 		VioletID:   bson.ObjectIdHex(vID),
 		Email:      email,
-		Name:       name,
 		Class:      0,
 		FilesClass: []string{"文档", "图书", "音乐", "代码", "备份", "其他"}, // 默认分类
 		Info: UserInfo{
+			Name:   name,
 			Avatar: avatar,
 			Bio:    bio,
 			Gender: gender,
 		},
-		Token:		token,
+		Token: token,
 	})
-	if err != nil {
-		return "", err
-	}
-	// 交给Service层初始化
-	/* err = InitNotification(string(newUser))
-	if err != nil {
-		return "", err
-	} */
-	return newUser, nil
+	return
 }
 
 // SetUserInfo 设置用户信息
-func (m *UserModel) SetUserInfo(id string, info UserInfo) (err error) {
-	_, err = m.DB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": info})
-	return
+func (m *UserModel) SetUserInfo(id string, info UserInfo) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": info})
 }
 
 // SetUserName 设置用户名
-func (m *UserModel) SetUserName(id, name string) (err error) {
-	_, err = m.DB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"name": name}})
-	return
-}
-
-// SetUserClass 设置用户类型
-func (m *UserModel) SetUserClass(id, class string) (err error) {
-	_, err = m.DB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"class": class}})
-	return
+func (m *UserModel) SetUserName(id, name string) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"name": name}})
 }
 
 // GetUserByID 根据ID查询用户
@@ -154,7 +138,50 @@ func (m *UserModel) GetUserByVID(id string) (user Users, err error) {
 }
 
 // SetUserToken 设置Token
-func (m *UserModel) SetUserToken(id, token string) (err error) {
-	_, err = m.DB.UpsertId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"token": token}})
-	return
+func (m *UserModel) SetUserToken(id, token string) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"token": token}})
+}
+
+// AddLikeNum 增加或减少点赞数
+func (m *UserModel) AddLikeNum(id string, add bool) error {
+	num := -1
+	if add {
+		num = 1
+	}
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"likeNum": num}})
+}
+
+// AddContentCount 增加内容数
+func (m *UserModel) AddContentCount(id string, add bool) error {
+	num := -1
+	if add {
+		num = 1
+	}
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"contentCount": num}})
+}
+
+// AddUsedSize 增加已用大小
+func (m *UserModel) AddUsedSize(id string, addSize int64) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"usedSize": addSize}})
+}
+
+// SetUserClass 设置用户类型
+func (m *UserModel) SetUserClass(id, class string) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"class": class}})
+}
+
+// SetSize 设置用户容量大小
+func (m *UserModel) SetSize(id string, maxSize, singleSize int64) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"maxSize": maxSize, "singleSize": singleSize}})
+}
+
+// AddFilesClass 增加文件分类
+func (m *UserModel) AddFilesClass(id string, filesClass string) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$push": bson.M{"filesClass": filesClass}})
+}
+
+// DeleteFilesClass 减少文件分类
+func (m *UserModel) DeleteFilesClass(id string, filesClass string) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$pull": bson.M{"filesClass": filesClass}})
+
 }

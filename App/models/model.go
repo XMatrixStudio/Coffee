@@ -23,7 +23,6 @@ type Model struct {
 	Content      ContentModel
 	Gather       GatherModel
 	Notification NotificationModel
-	Tag          TagModel
 }
 
 // InitMongo 初始化数据库
@@ -51,7 +50,6 @@ func (m *Model) InitMongo(conf Mongo) error {
 	m.Gather.CommentLikeDB = m.DB.C("commentLike")
 	m.Gather.UserLikeDB = m.DB.C("userLike")
 	m.Notification.DB = m.DB.C("notifications")
-	m.Tag.DB = m.DB.C("tags")
 	log.Printf("MongoDB Connect Success!")
 	return nil
 }

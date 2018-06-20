@@ -1,10 +1,11 @@
 package services
 
 import (
-	"github.com/XMatrixStudio/Coffee/app/models"
+	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/XMatrixStudio/Violet.SDK.Go"
 )
 
+// UserService 用户服务层
 type UserService interface {
 	InitViolet(c violetSdk.Config)
 	GetLoginURL(backURL string) (url, state string)
@@ -13,8 +14,9 @@ type UserService interface {
 }
 
 type userService struct {
-	Model  models.UserModel
-	Violet violetSdk.Violet
+	Violet  violetSdk.Violet
+	Model   *models.UserModel
+	Service *Service
 }
 
 func (s *userService) InitViolet(c violetSdk.Config) {
@@ -26,7 +28,7 @@ func (s *userService) GetLoginURL(backURL string) (url, state string) {
 	return
 }
 
-func (s *userService) LoginByCode(code string)(userID string, err error) {
+func (s *userService) LoginByCode(code string) (userID string, err error) {
 	// 获取用户Token
 	res, err := s.Violet.GetToken(code)
 	if err != nil {
@@ -38,13 +40,13 @@ func (s *userService) LoginByCode(code string)(userID string, err error) {
 		userID = user.ID.Hex()
 		s.Model.SetUserToken(user.ID.Hex(), res.Token)
 	} else if err.Error() == "not found" { // 数据库不存在此用户
-	    userNew, Nerr := s.Violet.GetUserBaseInfo(res.UserID, res.Token)
-		if Nerr != nil {
-			err = Nerr
+		userNew, errN := s.Violet.GetUserBaseInfo(res.UserID, res.Token)
+		if errN != nil {
+			err = errN
 			return
 		}
-		userBsonID, Nerr := s.Model.AddUser(res.UserID, res.Token ,userNew.Email, userNew.Name, userNew.Info.Avatar, userNew.Info.Bio, userNew.Info.Gender)
-		err = Nerr
+		userBsonID, errN := s.Model.AddUser(res.UserID, res.Token, userNew.Email, userNew.Name, userNew.Info.Avatar, userNew.Info.Bio, userNew.Info.Gender)
+		err = errN
 		userID = userBsonID.Hex()
 	}
 	return

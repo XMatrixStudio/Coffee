@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
@@ -12,12 +14,20 @@ type Notification struct {
 	Notifications []NotificationDetail `bson:"notifications"` // 通知集合
 }
 
+// 通知类型
+const (
+	TypeSystem = "system"
+	TypeLike   = "like"
+	TypeReply  = "reply"
+)
+
 // NotificationDetail 通知详情
 type NotificationDetail struct {
-	ID      bson.ObjectId `bson:"_id"`
-	Content string        `bson:"content"` // 通知内容
-	Read    bool          `bson:"read"`    // 是否以读
-	Type    string        `bson:"type"`    // 类型： "system", "like", "reply"...
+	ID         bson.ObjectId `bson:"_id"`
+	CreateTime time.Time     `bson:"time"`
+	Content    string        `bson:"content"` // 通知内容
+	Read       bool          `bson:"read"`    // 是否已读
+	Type       string        `bson:"type"`    // 类型： "system", "like", "reply"...
 }
 
 // NotificationModel 通知数据库
@@ -25,25 +35,16 @@ type NotificationModel struct {
 	DB *mgo.Collection
 }
 
-// InitNotification 初始化用户通知
-func (m *NotificationModel) InitNotification(user string) error {
-	newNotification := bson.NewObjectId()
-	err := m.DB.Insert(&Notification{
-		ID:     newNotification,
-		UserID: bson.ObjectIdHex(user),
-	})
-	return err
-}
-
 // AddNotification 添加一条通知 类型:"system", "like", "reply" ...
 func (m *NotificationModel) AddNotification(content, user, notificationType string) error {
 	newNotification := &NotificationDetail{
-		ID:      bson.NewObjectId(),
-		Content: content,
-		Read:    false,
-		Type:    notificationType,
+		ID:         bson.NewObjectId(),
+		CreateTime: time.Now(),
+		Content:    content,
+		Read:       false,
+		Type:       notificationType,
 	}
-	err := m.DB.Update(
+	_, err := m.DB.Upsert(
 		bson.M{"userId": bson.ObjectIdHex(user)},
 		bson.M{"$push": bson.M{"notifications": &newNotification}})
 	return err

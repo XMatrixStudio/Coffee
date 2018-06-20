@@ -5,9 +5,9 @@ import (
 
 	"time"
 
-	"github.com/XMatrixStudio/Coffee/app/controllers"
-	"github.com/XMatrixStudio/Coffee/app/models"
-	"github.com/XMatrixStudio/Coffee/app/services"
+	"github.com/XMatrixStudio/Coffee/App/controllers"
+	"github.com/XMatrixStudio/Coffee/App/models"
+	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/XMatrixStudio/Violet.SDK.Go"
 	"github.com/kataras/iris/mvc"
 	"github.com/kataras/iris/sessions"
@@ -36,7 +36,7 @@ func RunServer(c Config) {
 	}
 	// 初始化服务
 	Service := services.NewService(Model)
-	userService := Service.NewUserService()
+	userService := Service.GetUserService()
 	userService.InitViolet(c.Violet)
 
 	// 启动服务器
@@ -45,15 +45,13 @@ func RunServer(c Config) {
 		app.Logger().SetLevel("debug")
 	}
 
-	sessManager := sessions.New(sessions.Config{
-		Cookie:  "sessionBug",
+	sessionManager := sessions.New(sessions.Config{
+		Cookie:  "sessionCoffee",
 		Expires: 24 * time.Hour,
 	})
 
-	// "/users" based mvc application.
 	users := mvc.New(app.Party("/users"))
-	// Bind the "userService" to the UserController's Service (interface) field.
-	users.Register(userService, sessManager.Start)
+	users.Register(userService, sessionManager.Start)
 	users.Handle(new(controllers.UsersController))
 
 	app.Run(

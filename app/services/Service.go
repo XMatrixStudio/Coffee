@@ -1,20 +1,35 @@
 package services
 
-import "github.com/XMatrixStudio/Coffee/app/models"
+import "github.com/XMatrixStudio/Coffee/App/models"
 
+// Service 服务
 type Service struct {
-	Model *models.Model
+	Model        *models.Model
+	User         userService
+	Notification notificationService
 }
 
 // NewService 初始化Service
 func NewService(m *models.Model) *Service {
 	service := new(Service)
 	service.Model = m
+	service.User = userService{
+		Model:   &m.User,
+		Service: service,
+	}
+	service.Notification = notificationService{
+		Model:   &m.Notification,
+		Service: service,
+	}
 	return service
 }
 
-func (s *Service) NewUserService() UserService {
-	return &userService{
-		Model: s.Model.User,
-	}
+// GetUserService 新建 UserService
+func (s *Service) GetUserService() UserService {
+	return &s.User
+}
+
+// GetNotificationService 新建 NotificationService
+func (s *Service) GetNotificationService() NotificationService {
+	return &s.Notification
 }

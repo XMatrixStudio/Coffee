@@ -1,24 +1,21 @@
 package controllers
 
 import (
-	"github.com/XMatrixStudio/Coffee/app/services"
+	"github.com/XMatrixStudio/Coffee/App/models"
+	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
-	"github.com/XMatrixStudio/Coffee/app/models"
 )
 
+// UsersController Users控制
 type UsersController struct {
 	Ctx     iris.Context
 	Service services.UserService
 	Session *sessions.Session
 }
 
-type commonRes struct {
-	State string
-	Data  string
-}
-
-func (c *UsersController) GetLogin() (res commonRes) {
+// GetLogin GET /login 获取登陆页面链接
+func (c *UsersController) GetLogin() (res CommonRes) {
 	redirectURL := c.Ctx.FormValue("RedirectURL")
 	url, state := c.Service.GetLoginURL(redirectURL)
 	res.State = "success"
@@ -32,7 +29,8 @@ type loginReq struct {
 	State string `json:"state"`
 }
 
-func (c *UsersController) PostLogin() (res commonRes) {
+// PostLogin POST /login 用户登陆
+func (c *UsersController) PostLogin() (res CommonRes) {
 	req := loginReq{}
 	c.Ctx.ReadJSON(&req)
 	if req.State != c.Session.GetString("state") {
@@ -54,7 +52,7 @@ func (c *UsersController) PostLogin() (res commonRes) {
 
 type userInfoRes struct {
 	State        string
-	Data		 string
+	Data         string
 	Email        string
 	Name         string
 	Class        int
@@ -67,6 +65,7 @@ type userInfoRes struct {
 	ContentCount int64    // 内容数量
 }
 
+// GetInfo GET /info 获取用户信息
 func (c *UsersController) GetInfo() (res userInfoRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "error"
@@ -80,7 +79,7 @@ func (c *UsersController) GetInfo() (res userInfoRes) {
 		return
 	}
 	res.State = "success"
-	res.Name = user.Name
+	res.Name = user.Info.Name
 	res.Info = user.Info
 	res.Email = user.Email
 	res.Class = user.Class
