@@ -102,7 +102,7 @@ func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender 
 		ID:         newUser,
 		VioletID:   bson.ObjectIdHex(vID),
 		Email:      email,
-		Class:      0,
+		Class:      1,
 		FilesClass: []string{"文档", "图书", "音乐", "代码", "备份", "其他"}, // 默认分类
 		Info: UserInfo{
 			Name:   name,
@@ -111,6 +111,8 @@ func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender 
 			Gender: gender,
 		},
 		Token: token,
+		MaxSize: 8388608,
+		SingleSize: 2097152,
 	})
 	return
 }

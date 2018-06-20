@@ -108,8 +108,9 @@ func (m *ContentModel) GetContentByOwn(ownID string) []Content {
 	return content
 }
 
-func (m *ContentModel) GetCountByOwn(id string) int {
-
+func (m *ContentModel) GetCountByOwn(ownID string) (count int, err error) {
+	count, err = m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID)}).Count()
+	return
 }
 
 // GetPageContent 获取内容指定分页内容集合

@@ -91,3 +91,8 @@ func (c *UsersController) GetInfo() (res userInfoRes) {
 	res.ContentCount = user.ContentCount
 	return
 }
+
+func (c *UsersController) PostLogout() string {
+	c.Session.Delete("id")
+	return "success"
+}
