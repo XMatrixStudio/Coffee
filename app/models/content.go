@@ -31,7 +31,7 @@ type Content struct {
 	ID          bson.ObjectId `bson:"_id"`
 	Name        string        `bson:"name"`        // 内容名字
 	Detail      string        `bson:"detail"`      // 详情介绍
-	OwnID       string        `bson:"ownId"`       // 作者ID [索引]
+	OwnID       bson.ObjectId `bson:"ownId"`       // 作者ID [索引]
 	PublishDate int64         `bson:"publishDate"` // 发布日期
 	EditDate    int64         `bson:"editDate"`    // 修改日期
 	LikeNum     int64         `bson:"likeNum"`     // 点赞人数
@@ -49,7 +49,7 @@ type Content struct {
 	App         App           `bson:"app"`         // App/Game类型专属
 }
 
-// CommentModel 内容数据库
+// ContentModel 内容数据库
 type ContentModel struct {
 	DB *mgo.Collection
 }
@@ -61,7 +61,7 @@ func (m *ContentModel) AddContent(name, detail, userID, contentType string) (bso
 		ID:          newContent,
 		Name:        name,
 		Detail:      detail,
-		OwnID:       userID,
+		OwnID:       bson.ObjectIdHex(userID),
 		PublishDate: time.Now().Unix() * 1000,
 		EditDate:    time.Now().Unix() * 1000,
 		LikeNum:     0,
@@ -99,19 +99,23 @@ func (m *ContentModel) UpdateByID(id string, data Content) (err error) {
 }
 
 // GetContentByOwn 根据作者ID查询内容
-func (m *ContentModel) GetContentByOwn(id string) []Content {
+func (m *ContentModel) GetContentByOwn(ownID string) []Content {
 	var content []Content
-	err := m.DB.Find(bson.M{"ownId": id}).All(&content)
+	err := m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID)}).All(&content)
 	if err != nil {
 		return nil
 	}
 	return content
 }
 
+func (m *ContentModel) GetCountByOwn(id string) int {
+
+}
+
 // GetPageContent 获取内容指定分页内容集合
 func (m *ContentModel) GetPageContent(ownID, contentType, subType string, eachNum, pageNum int) []Content {
 	var content []Content
-	err := m.DB.Find(nil).Sort("-editDate").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&content)
+	err := m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID)}).Sort("-editDate").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&content)
 	if err != nil {
 		return nil
 	}
