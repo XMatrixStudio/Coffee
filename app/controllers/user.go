@@ -32,7 +32,12 @@ type loginReq struct {
 // PostLogin POST /login 用户登陆
 func (c *UsersController) PostLogin() (res CommonRes) {
 	req := loginReq{}
-	c.Ctx.ReadJSON(&req)
+	err := c.Ctx.ReadJSON(&req)
+	if err != nil {
+		res.State = "error"
+		res.Data = "Bad request."
+		return
+	}
 	if req.State != c.Session.GetString("state") {
 		res.State = "error"
 		res.Data = "State is error."

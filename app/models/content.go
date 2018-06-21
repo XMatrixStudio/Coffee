@@ -55,25 +55,14 @@ type ContentModel struct {
 }
 
 // AddContent 增加内容
-func (m *ContentModel) AddContent(name, detail, userID, contentType string) (bson.ObjectId, error) {
-	newContent := bson.NewObjectId()
-	err := m.DB.Insert(&Content{
-		ID:          newContent,
-		Name:        name,
-		Detail:      detail,
-		OwnID:       bson.ObjectIdHex(userID),
-		PublishDate: time.Now().Unix() * 1000,
-		EditDate:    time.Now().Unix() * 1000,
-		LikeNum:     0,
-		CommentNum:  0,
-		Public:      true,
-		Type:        contentType,
-		Native:      false,
-	})
-	if err != nil {
-		return "", err
-	}
-	return newContent, nil
+func (m *ContentModel) AddContent(content Content) (bson.ObjectId, error) {
+	content.ID = bson.NewObjectId()
+	content.PublishDate = time.Now().Unix() * 1000
+	content.EditDate = time.Now().Unix() * 1000
+	content.LikeNum = 0
+	content.CommentNum = 0
+	err := m.DB.Insert(content)
+	return content.ID, err
 }
 
 // RemoveContent 删除内容
@@ -108,15 +97,16 @@ func (m *ContentModel) GetContentByOwn(ownID string) []Content {
 	return content
 }
 
+// GetCountByOwn 获取公开内容数量
 func (m *ContentModel) GetCountByOwn(ownID string) (count int, err error) {
-	count, err = m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID)}).Count()
+	count, err = m.DB.Find(bson.M{"public": true}).Count()
 	return
 }
 
 // GetPageContent 获取内容指定分页内容集合
-func (m *ContentModel) GetPageContent(ownID, contentType, subType string, eachNum, pageNum int) []Content {
+func (m *ContentModel) GetPageContent(eachNum, pageNum int) []Content {
 	var content []Content
-	err := m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID)}).Sort("-editDate").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&content)
+	err := m.DB.Find(bson.M{"public": true}).Sort("-editDate").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&content)
 	if err != nil {
 		return nil
 	}
