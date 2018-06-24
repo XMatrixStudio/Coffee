@@ -24,10 +24,12 @@ const (
 // NotificationDetail 通知详情
 type NotificationDetail struct {
 	ID         bson.ObjectId `bson:"_id"`
-	CreateTime time.Time     `bson:"time"`
-	Content    string        `bson:"content"` // 通知内容
-	Read       bool          `bson:"read"`    // 是否已读
-	Type       string        `bson:"type"`    // 类型： "system", "like", "reply"...
+	CreateTime int64         `bson:"time"`
+	Content    string        `bson:"content"`  // 通知内容
+	SourceID   string        `bson:"sourceId"` // 源ID （点赞人）
+	TargetID   string        `bson:"targetId"` // 目标ID （点赞文章）
+	Read       bool          `bson:"read"`     // 是否已读
+	Type       string        `bson:"type"`     // 类型： "system", "like", "reply"...
 }
 
 // NotificationModel 通知数据库
@@ -36,12 +38,14 @@ type NotificationModel struct {
 }
 
 // AddNotification 添加一条通知 类型:"system", "like", "reply" ...
-func (m *NotificationModel) AddNotification(content, user, notificationType string) error {
+func (m *NotificationModel) AddNotification(content, user, sourceID, targetID, notificationType string) error {
 	newNotification := &NotificationDetail{
 		ID:         bson.NewObjectId(),
-		CreateTime: time.Now(),
+		CreateTime: time.Now().Unix() * 1000,
 		Content:    content,
 		Read:       false,
+		SourceID:   sourceID,
+		TargetID:   targetID,
 		Type:       notificationType,
 	}
 	_, err := m.DB.Upsert(
@@ -52,26 +56,33 @@ func (m *NotificationModel) AddNotification(content, user, notificationType stri
 
 // ReadANotification 标记通知
 func (m *NotificationModel) ReadANotification(user, id string, status bool) error {
-	err := m.DB.Update(
+	return m.DB.Update(
 		bson.M{"userId": bson.ObjectIdHex(user), "notifications._id": id},
 		bson.M{"$set": bson.M{"notifications.$.read": status}})
-	return err
 }
 
 // RemoveANotification 删除通知
 func (m *NotificationModel) RemoveANotification(user, id string) error {
-	err := m.DB.Update(
-		bson.M{"userId": bson.ObjectIdHex(user), "notifications._id": id},
+	return m.DB.Update(
+		bson.M{"userId": bson.ObjectIdHex(user)},
 		bson.M{"$pull": bson.M{"notifications._id": id}})
-	return err
 }
 
 // GetNotificationsByUser 获取用户所有通知
 func (m *NotificationModel) GetNotificationsByUser(user string) ([]NotificationDetail, error) {
 	var notifications []NotificationDetail
-	err := m.DB.Find(nil).All(notifications)
-	if err != nil {
-		return nil, err
-	}
-	return notifications, nil
+	err := m.DB.Find(bson.M{"userId": bson.ObjectIdHex(user)}).All(&notifications)
+	return notifications, err
+}
+
+// GetUnreadCountByUser 获取用户未读通知数量
+func (m *NotificationModel) GetUnreadCountByUser(userID string) (count int, err error) {
+	count, err = m.DB.Find(bson.M{"userId": bson.ObjectIdHex(userID), "notifications.read": false}).Count()
+	return
+}
+
+func (m *NotificationModel) RemoveUnread(user, sid, tid string) error {
+	return m.DB.Update(
+		bson.M{"userId": bson.ObjectIdHex(user), "notifications.sourceId": sid},
+		bson.M{"$pull": bson.M{"notifications.targetId": tid}})
 }

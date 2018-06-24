@@ -3,11 +3,12 @@ package models
 import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"errors"
 )
 
 // 用户类型
 const (
-	ClassBlackUser int = iota
+	ClassBlackUser  int = iota
 	ClassLimitUser
 	ClassNormalUser
 	ClassVerifyUser
@@ -77,7 +78,7 @@ type Users struct {
 
 // 性别
 const (
-	GenderMan int = iota
+	GenderMan     int = iota
 	GenderWoman
 	GenderUnknown
 )
@@ -97,6 +98,10 @@ type UserModel struct {
 
 // AddUser 添加用户
 func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender int) (newUser bson.ObjectId, err error) {
+	if !bson.IsObjectIdHex(vID) {
+		err = errors.New("not_id")
+		return
+	}
 	newUser = bson.NewObjectId()
 	err = m.DB.Insert(&Users{
 		ID:         newUser,
@@ -110,8 +115,8 @@ func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender 
 			Bio:    bio,
 			Gender: gender,
 		},
-		Token: token,
-		MaxSize: 8388608,
+		Token:      token,
+		MaxSize:    8388608,
 		SingleSize: 2097152,
 	})
 	return
@@ -119,33 +124,53 @@ func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender 
 
 // SetUserInfo 设置用户信息
 func (m *UserModel) SetUserInfo(id string, info UserInfo) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": info})
 }
 
 // SetUserName 设置用户名
 func (m *UserModel) SetUserName(id, name string) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"name": name}})
 }
 
 // GetUserByID 根据ID查询用户
 func (m *UserModel) GetUserByID(id string) (user Users, err error) {
+	if !bson.IsObjectIdHex(id) {
+		err = errors.New("not_id")
+		return
+	}
 	err = m.DB.FindId(bson.ObjectIdHex(id)).One(&user)
 	return
 }
 
 // GetUserByVID 根据VioletID查询用户
 func (m *UserModel) GetUserByVID(id string) (user Users, err error) {
+	if !bson.IsObjectIdHex(id) {
+		err = errors.New("not_id")
+		return
+	}
 	err = m.DB.Find(bson.M{"vid": bson.ObjectIdHex(id)}).One(&user)
 	return
 }
 
 // SetUserToken 设置Token
 func (m *UserModel) SetUserToken(id, token string) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"token": token}})
 }
 
 // AddLikeNum 增加或减少点赞数
 func (m *UserModel) AddLikeNum(id string, add bool) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	num := -1
 	if add {
 		num = 1
@@ -155,6 +180,9 @@ func (m *UserModel) AddLikeNum(id string, add bool) error {
 
 // AddContentCount 增加内容数
 func (m *UserModel) AddContentCount(id string, add bool) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	num := -1
 	if add {
 		num = 1
@@ -164,26 +192,41 @@ func (m *UserModel) AddContentCount(id string, add bool) error {
 
 // AddUsedSize 增加已用大小
 func (m *UserModel) AddUsedSize(id string, addSize int64) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"usedSize": addSize}})
 }
 
 // SetUserClass 设置用户类型
 func (m *UserModel) SetUserClass(id, class string) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"class": class}})
 }
 
 // SetSize 设置用户容量大小
 func (m *UserModel) SetSize(id string, maxSize, singleSize int64) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"maxSize": maxSize, "singleSize": singleSize}})
 }
 
 // AddFilesClass 增加文件分类
 func (m *UserModel) AddFilesClass(id string, filesClass string) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$push": bson.M{"filesClass": filesClass}})
 }
 
 // DeleteFilesClass 减少文件分类
 func (m *UserModel) DeleteFilesClass(id string, filesClass string) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$pull": bson.M{"filesClass": filesClass}})
 
 }

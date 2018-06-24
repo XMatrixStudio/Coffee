@@ -35,10 +35,6 @@ func RunServer(c Config) {
 		panic(err)
 	}
 	// 初始化服务
-	Service := services.NewService(Model)
-	userService := Service.GetUserService()
-	userService.InitViolet(c.Violet)
-
 	// 启动服务器
 	app := iris.New()
 	if c.Server.Dev {
@@ -50,9 +46,30 @@ func RunServer(c Config) {
 		Expires: 24 * time.Hour,
 	})
 
+	Service := services.NewService(Model)
+
 	users := mvc.New(app.Party("/users"))
+	userService := Service.GetUserService()
+	userService.InitViolet(c.Violet)
 	users.Register(userService, sessionManager.Start)
 	users.Handle(new(controllers.UsersController))
+
+	content := mvc.New(app.Party("/content"))
+	content.Register(Service.GetContentService(), sessionManager.Start)
+	content.Handle(new(controllers.ContentController))
+
+	comment := mvc.New(app.Party("/comment"))
+	comment.Register(Service.GetCommentService(), sessionManager.Start)
+	comment.Handle(new(controllers.CommentController))
+
+	like := mvc.New(app.Party("/like"))
+	like.Register(Service.GetLikeService(), sessionManager.Start)
+	like.Handle(new(controllers.LikeController))
+
+
+	notification := mvc.New(app.Party("/notification"))
+	notification.Register(Service.GetNotificationService(), sessionManager.Start)
+	notification.Handle(new(controllers.NotificationController))
 
 	app.Run(
 		// Starts the web server

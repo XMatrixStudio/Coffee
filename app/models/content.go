@@ -3,8 +3,9 @@ package models
 import (
 	"time"
 
-	mgo "github.com/globalsign/mgo"
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"errors"
 )
 
 // Content 内容
@@ -49,6 +50,15 @@ type Content struct {
 	App         App           `bson:"app"`         // App/Game类型专属
 }
 
+const (
+	TypeText = "Text"
+	TypePic  = "Pic"
+	TypeFilm = "Film"
+	TypeApp  = "App"
+	TypeGame = "Game"
+	TypeDoc  = "Doc"
+)
+
 // ContentModel 内容数据库
 type ContentModel struct {
 	DB *mgo.Collection
@@ -67,30 +77,46 @@ func (m *ContentModel) AddContent(content Content) (bson.ObjectId, error) {
 
 // RemoveContent 删除内容
 func (m *ContentModel) RemoveContent(id string) (err error) {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
 	err = m.DB.RemoveId(bson.ObjectIdHex(id))
 	return
 }
 
 // GetContentByID 根据ID查询内容
-func (m *ContentModel) GetContentByID(id string) *Content {
-	content := new(Content)
-	err := m.DB.FindId(id).One(&content)
-	if err != nil {
-		return nil
+func (m *ContentModel) GetContentByID(id string) (content Content,err error) {
+	if !bson.IsObjectIdHex(id) {
+		err = errors.New("not_id")
+		return
 	}
-	return content
+	err = m.DB.FindId(bson.ObjectIdHex(id)).One(&content)
+	return
 }
 
 // UpdateByID 根据ID更新内容
 func (m *ContentModel) UpdateByID(id string, data Content) (err error) {
-	err = m.DB.UpdateId(bson.ObjectIdHex(id), &data)
-	return
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
+	return m.DB.UpdateId(bson.ObjectIdHex(id), &data)
+
+}
+
+func (m *ContentModel) DeleteByID(id string) (err error) {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
+	return m.DB.RemoveId(bson.ObjectIdHex(id))
 }
 
 // GetContentByOwn 根据作者ID查询内容
 func (m *ContentModel) GetContentByOwn(ownID string) []Content {
+	if !bson.IsObjectIdHex(ownID) {
+		return nil
+	}
 	var content []Content
-	err := m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID)}).All(&content)
+	err := m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID)}).Sort("-editDate").All(&content)
 	if err != nil {
 		return nil
 	}
@@ -99,6 +125,9 @@ func (m *ContentModel) GetContentByOwn(ownID string) []Content {
 
 // GetCountByOwn 获取公开内容数量
 func (m *ContentModel) GetCountByOwn(ownID string) (count int, err error) {
+	if !bson.IsObjectIdHex(ownID) {
+		return 0, errors.New("not_id")
+	}
 	count, err = m.DB.Find(bson.M{"public": true}).Count()
 	return
 }
@@ -111,4 +140,12 @@ func (m *ContentModel) GetPageContent(eachNum, pageNum int) []Content {
 		return nil
 	}
 	return content
+}
+
+func (m *ContentModel) AddLikeCount(id string, num int) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"likeNum": num}})
+}
+
+func (m *ContentModel) AddCommentCount(id string, num int) error {
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"commentNum": num}})
 }

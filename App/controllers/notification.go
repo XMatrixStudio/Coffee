@@ -1,14 +1,15 @@
 package controllers
 
 import (
-	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/kataras/iris"
+	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/kataras/iris/sessions"
 )
 
-// ContentController 内容
-type ContentController struct {
+// NotificationController Like
+type NotificationController struct {
 	Ctx     iris.Context
-	Service services.ContentService
+	Service services.LikeService
 	Session *sessions.Session
 }
+

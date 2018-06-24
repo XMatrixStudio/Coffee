@@ -11,12 +11,14 @@ type UserService interface {
 	GetLoginURL(backURL string) (url, state string)
 	LoginByCode(code string) (userID string, err error)
 	GetUserInfo(id string) (user models.Users, err error)
+	GetUserBaseInfo(id string) (user UserBaseInfo)
 }
 
 type userService struct {
-	Violet  violetSdk.Violet
-	Model   *models.UserModel
-	Service *Service
+	Violet   violetSdk.Violet
+	Model    *models.UserModel
+	UserInfo map[string]UserBaseInfo
+	Service  *Service
 }
 
 func (s *userService) InitViolet(c violetSdk.Config) {
@@ -54,5 +56,31 @@ func (s *userService) LoginByCode(code string) (userID string, err error) {
 
 func (s *userService) GetUserInfo(id string) (user models.Users, err error) {
 	user, err = s.Model.GetUserByID(id)
+	return
+}
+
+// UserBaseInfo 用户个性信息
+type UserBaseInfo struct {
+	Name   string
+	Avatar string
+}
+
+// GetUserBaseInfo 从缓存中读取用户基本信息，如果不存在则从数据库中读取
+func (s *userService) GetUserBaseInfo(id string) (user UserBaseInfo) {
+	user, ok := s.UserInfo[id]
+	if !ok {
+		userInfo, err := s.GetUserInfo(id)
+		if err != nil {
+			return UserBaseInfo{
+				Name:   "匿名用户",
+				Avatar: "https://pic3.zhimg.com/50/v2-e2361d82ce7465808260f87bed4a32d0_im.jpg",
+			}
+		}
+		user = UserBaseInfo{
+			Name:   userInfo.Info.Name,
+			Avatar: userInfo.Info.Avatar,
+		}
+		s.UserInfo[id] = user
+	}
 	return
 }
