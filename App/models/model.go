@@ -50,7 +50,6 @@ func (m *Model) InitMongo(conf Mongo) error {
 	m.Comment.CommentDB = m.DB.C("comments")
 	m.Comment.ReplyDB = m.DB.C("reply")
 	m.Gather.ContentLikeDB = m.DB.C("like")
-	m.Gather.CommentLikeDB = m.DB.C("commentLike")
 	m.Gather.UserLikeDB = m.DB.C("userLike")
 	log.Printf("MongoDB Connect Success!")
 	return nil

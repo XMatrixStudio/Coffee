@@ -8,7 +8,7 @@ import (
 type LikeService interface {
 	GetUserLikes(userID string) (ids []string, err error)
 	AddLikeToContent(id, userID string) error
-	AddLikeToComment(id, userID string, isReply bool)
+	AddLikeToComment(id, userID string, isReply bool) error
 	RemoveLikeFromContent(id, userID string) error
 	RemoveLikeFromComment(id, userID string, isReply bool) error
 }

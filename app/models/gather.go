@@ -1,10 +1,9 @@
 package models
 
 import (
-	"errors"
-
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"errors"
 )
 
 // Gather 集合
@@ -29,7 +28,7 @@ type GatherModel struct {
 // AddLikeToContent 增加Like到内容里面
 func (m *GatherModel) AddLikeToContent(contentID, userID string) error {
 	info, err := m.ContentLikeDB.Upsert(bson.M{"id": contentID}, bson.M{"$addToSet": bson.M{"ids": userID}})
-	if info.Matched == 0 {
+	if info.Matched == 1 && info.Updated == 0 {
 		return errors.New("exist")
 	}
 	return err
@@ -37,7 +36,7 @@ func (m *GatherModel) AddLikeToContent(contentID, userID string) error {
 // RemoveLikeFromContent 取消点赞内容
 func (m *GatherModel) RemoveLikeFromContent(contentID, userID string) error {
 	info, err := m.ContentLikeDB.Upsert(bson.M{"id": contentID}, bson.M{"$pull": bson.M{"ids": userID}})
-	if info.Matched == 0 {
+	if info.Updated == 0 {
 		return errors.New("not found")
 	}
 	return err
@@ -46,7 +45,7 @@ func (m *GatherModel) RemoveLikeFromContent(contentID, userID string) error {
 // AddLikeToUser
 func (m *GatherModel) AddLikeToUser(contentID, userID string) error {
 	info, err := m.UserLikeDB.Upsert(bson.M{"id": userID}, bson.M{"$addToSet": bson.M{"ids": contentID}})
-	if info.Matched == 0 {
+	if info.Matched == 1 && info.Updated == 0 {
 		return errors.New("exist")
 	}
 	return err
@@ -55,7 +54,7 @@ func (m *GatherModel) AddLikeToUser(contentID, userID string) error {
 // RemoveLikeFromUser
 func (m *GatherModel) RemoveLikeFromUser(commentID, userID string) error {
 	info, err := m.UserLikeDB.Upsert(bson.M{"id": userID}, bson.M{"$pull": bson.M{"ids": commentID}})
-	if info.Matched == 0 {
+	if info.Updated == 0 {
 		return errors.New("not found")
 	}
 	return err

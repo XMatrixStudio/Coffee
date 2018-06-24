@@ -55,16 +55,18 @@ func (s *commentService) GetComment(id string, page, eachPage int) (comments []C
 }
 
 func (s *commentService) AddComment(userID, contentID, fatherID, content string, isReply bool) (err error) {
-	if isReply {
-		return s.Model.AddComment(contentID, userID, content, fatherID, isReply)
-	} else {
-		err = s.Model.AddComment(contentID, userID, content, fatherID, isReply)
-		if err != nil {
-			return
-		}
-		s.Service.Content.AddCommentCount(contentID, 1)
+	err =  s.Model.AddComment(contentID, userID, content, fatherID, isReply)
+	if err != nil {
 		return
 	}
+	if !isReply  {
+		s.Service.Content.AddCommentCount(contentID, 1)
+	}
+	// 给father发送通知
+	if fatherID != userID {
+		s.Service.Notification.AddNotification(fatherID, "", userID, contentID, models.TypeReply)
+	}
+	return
 }
 
 func (s *commentService) DeleteComment(id, userId string) error {

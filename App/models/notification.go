@@ -57,7 +57,7 @@ func (m *NotificationModel) AddNotification(content, user, sourceID, targetID, n
 // ReadANotification 标记通知
 func (m *NotificationModel) ReadANotification(user, id string, status bool) error {
 	return m.DB.Update(
-		bson.M{"userId": bson.ObjectIdHex(user), "notifications._id": id},
+		bson.M{"userId": bson.ObjectIdHex(user), "notifications._id": bson.ObjectIdHex(id)},
 		bson.M{"$set": bson.M{"notifications.$.read": status}})
 }
 
@@ -65,7 +65,7 @@ func (m *NotificationModel) ReadANotification(user, id string, status bool) erro
 func (m *NotificationModel) RemoveANotification(user, id string) error {
 	return m.DB.Update(
 		bson.M{"userId": bson.ObjectIdHex(user)},
-		bson.M{"$pull": bson.M{"notifications._id": id}})
+		bson.M{"$pull": bson.M{"notifications._id": bson.ObjectIdHex(id)}})
 }
 
 // GetNotificationsByUser 获取用户所有通知
