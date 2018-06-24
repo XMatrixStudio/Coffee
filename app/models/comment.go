@@ -68,10 +68,10 @@ func (m *CommentModel) RemoveReply(id string) (err error) {
 	return m.ReplyDB.RemoveId(bson.ObjectIdHex(id))
 }
 
-// GetCommentByContentID 获取内容指定页数的评论
-func (m *CommentModel) GetCommentByContentID(id string, pageNum, eachNum int) []Comment {
+// GetCommentByContentID 获取内容的评论
+func (m *CommentModel) GetCommentByContentID(id string) []Comment {
 	var comment []Comment
-	err := m.CommentDB.Find(bson.M{"contentId": bson.ObjectIdHex(id)}).Sort("-date").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&comment)
+	err := m.CommentDB.Find(bson.M{"contentId": bson.ObjectIdHex(id)}).Sort("-date").All(&comment)
 	if err != nil {
 		fmt.Println(err)
 	}

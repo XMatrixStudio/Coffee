@@ -10,10 +10,12 @@ import (
 type ContentService interface {
 	AddText(ownID, title, text string, isPublic bool, tags []string) error
 	GetContentByOwn(ownID string) []models.Content
+	GetContentByID(id string) (models.Content, error)
 	DeleteContentByID(id, userID string) error
 	PatchContentByID(id, title, content string, tags []string, public bool) error
 	AddCommentCount(id string, num int) error
 	AddLikeCount(id string, num int) error
+	GetUserBaseInfo(id string) (user UserBaseInfo)
 }
 
 type contentService struct {
@@ -21,8 +23,8 @@ type contentService struct {
 	Service *Service
 }
 
-func (c *contentService) AddText(ownID, title, text string, isPublic bool, tags []string) (err error) {
-	_, err = c.Model.AddContent(models.Content{
+func (s *contentService) AddText(ownID, title, text string, isPublic bool, tags []string) (err error) {
+	_, err = s.Model.AddContent(models.Content{
 		OwnID:  bson.ObjectIdHex(ownID),
 		Name:   title,
 		Detail: text,
@@ -34,35 +36,39 @@ func (c *contentService) AddText(ownID, title, text string, isPublic bool, tags 
 		return
 	}
 	for i := range tags {
-		c.Service.Tag.AddTag(ownID, tags[i])
+		s.Service.Tag.AddTag(ownID, tags[i])
 	}
 	return
 }
 
-func (c *contentService) GetContentByOwn(ownID string) []models.Content {
-	return c.Model.GetContentByOwn(ownID)
-
+func (s *contentService) GetContentByID(id string) (models.Content, error) {
+	return s.Model.GetContentByID(id)
 }
 
-func (c *contentService) DeleteContentByID(id, userID string) error {
-	content, err := c.Model.GetContentByID(id)
+func (s *contentService) GetContentByOwn(ownID string) []models.Content {
+	return s.Model.GetContentByOwn(ownID)
+}
+
+func (s *contentService) DeleteContentByID(id, userID string) error {
+	content, err := s.Model.GetContentByID(id)
 	if err != nil {
 		return err
 	}
 	if content.OwnID.Hex() != userID {
 		return errors.New("not_allow")
 	}
-	err = c.Model.DeleteByID(id)
+	err = s.Model.DeleteByID(id)
 	if err != nil {
 		return err
 	}
 	// 删除评论
-	c.Service.Comment.Model.DeleteAllByContent(id)
+	s.Service.Comment.Model.DeleteAllByContent(id)
+	s.Service.Like.Model.RemoveAllByID(id)
 	return nil
 }
 
-func (c *contentService) PatchContentByID(id, title, content string, tags []string, public bool) error {
-	con, err := c.Model.GetContentByID(id)
+func (s *contentService) PatchContentByID(id, title, content string, tags []string, public bool) error {
+	con, err := s.Model.GetContentByID(id)
 	if err != nil {
 		return err
 	}
@@ -70,13 +76,17 @@ func (c *contentService) PatchContentByID(id, title, content string, tags []stri
 	con.Detail = content
 	con.Tag = tags
 	con.Public = public
-	return c.Model.UpdateByID(id, con)
+	return s.Model.UpdateByID(id, con)
 }
 
-func (c *contentService) AddCommentCount(id string, num int) error {
-	return c.Model.AddCommentCount(id, num)
+func (s *contentService) AddCommentCount(id string, num int) error {
+	return s.Model.AddCommentCount(id, num)
 }
 
-func (c *contentService) AddLikeCount(id string, num int) error {
-	return c.Model.AddLikeCount(id, num)
+func (s *contentService) AddLikeCount(id string, num int) error {
+	return s.Model.AddLikeCount(id, num)
+}
+
+func (s *contentService) GetUserBaseInfo(id string) (user UserBaseInfo) {
+	return s.Service.User.GetUserBaseInfo(id)
 }

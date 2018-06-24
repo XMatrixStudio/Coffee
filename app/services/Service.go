@@ -69,3 +69,4 @@ func (s *Service) GetCommentService() CommentService {
 func (s *Service) GetLikeService() LikeService {
 	return &s.Like
 }
+

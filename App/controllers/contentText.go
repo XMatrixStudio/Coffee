@@ -7,13 +7,13 @@ import (
 )
 
 // ContentRes 内容回复
-type ContentRes struct {
+type ContentTextRes struct {
 	State string
 	Data  []models.Content
 }
 
 // GetMyContent GET /MyContent 获取指定用户的所有内容
-func (c *ContentController) GetTexts() (res ContentRes) {
+func (c *ContentController) GetTexts() (res ContentTextRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
 		return

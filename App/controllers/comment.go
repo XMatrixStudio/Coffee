@@ -5,7 +5,6 @@ import (
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
 	"github.com/globalsign/mgo/bson"
-	"strconv"
 )
 
 // ContentController 内容
@@ -21,22 +20,12 @@ type GetCommentRes struct {
 }
 
 func (c *CommentController) GetBy(id string) (res GetCommentRes) {
-	page, err := strconv.Atoi(c.Ctx.FormValue("page"))
-	if err != nil {
-		res.State = "error_page"
-		return
-	}
-	eachPage, err := strconv.Atoi(c.Ctx.FormValue("eachPage"))
-	if err != nil {
-		res.State = "error_pageEach"
-		return
-	}
 	if !bson.IsObjectIdHex(id) {
 		res.State = "error_id"
 		return
 	}
 	res.State = "success"
-	res.Data = c.Service.GetComment(id, page, eachPage)
+	res.Data = c.Service.GetComment(id)
 	return
 }
 

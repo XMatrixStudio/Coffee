@@ -23,6 +23,10 @@ type GatherModel struct {
 	UserLikeDB *mgo.Collection
 }
 
+func (m *GatherModel) RemoveAllByID(id string) {
+	m.ContentLikeDB.Remove(bson.M{"id": id})
+	m.UserLikeDB.Upsert(nil, bson.M{"$pull": bson.M{"ids": id}})
+}
 
 
 // AddLikeToContent 增加Like到内容里面

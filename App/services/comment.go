@@ -7,7 +7,7 @@ import (
 
 // CommentService 评论
 type CommentService interface {
-	GetComment(id string, page, eachPage int) (comments []CommentForContent)
+	GetComment(id string) (comments []CommentForContent)
 	AddComment(userID, contentID, fatherID, content string, isReply bool) error
 	DeleteComment(id, userId string) error
 }
@@ -31,8 +31,8 @@ type ReplyForComment struct {
 	Father UserBaseInfo
 }
 
-func (s *commentService) GetComment(id string, page, eachPage int) (comments []CommentForContent) {
-	commentAll := s.Model.GetCommentByContentID(id, page, eachPage)
+func (s *commentService) GetComment(id string) (comments []CommentForContent) {
+	commentAll := s.Model.GetCommentByContentID(id)
 	for i := range commentAll {
 		replyAll, err := s.Model.GetReplyByCommentID(commentAll[i].ID.Hex())
 		var replies []ReplyForComment
@@ -114,5 +114,6 @@ func (s *commentService) DeleteComment(id, userId string) error {
 		s.Model.RemoveComment(id)
 		s.Service.Content.AddCommentCount(comment.ContentID.Hex(), -1)
 	}
+	s.Service.Like.Model.RemoveAllByID(id)
 	return nil
 }
