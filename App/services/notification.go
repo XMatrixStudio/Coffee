@@ -5,7 +5,7 @@ import "github.com/XMatrixStudio/Coffee/App/models"
 // NotificationService 通知服务
 type NotificationService interface {
 	AddNotification(id, content, sID, tID, typeN string) error
-	GetUserNotification(userID string) (messages []models.NotificationDetail, err error)
+	GetUserNotification(userID string) (messages []NotificationData, err error)
 	GetUserUnreadCount(userID string) (count int, err error)
 	SetRead(userId, id string ,isRead bool) error
 	RemoveByID(userID, id string) error
@@ -20,8 +20,19 @@ func (s *notificationService) AddNotification(userId, content, sID, tID, typeN s
 	return s.Model.AddNotification(content, userId, sID, tID, typeN)
 }
 
-func (s *notificationService) GetUserNotification(userID string) (messages []models.NotificationDetail, err error) {
-	messages, err = s.Model.GetNotificationsByUser(userID)
+type NotificationData struct {
+	User UserBaseInfo
+	Data models.NotificationDetail
+}
+
+func (s *notificationService) GetUserNotification(userID string) (data []NotificationData, err error) {
+	messages, err := s.Model.GetNotificationsByUser(userID)
+	for i := range messages {
+		data = append(data, NotificationData{
+			User: s.Service.User.GetUserBaseInfo(messages[i].SourceID),
+			Data: messages[i],
+		})
+	}
 	return
 }
 

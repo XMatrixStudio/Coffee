@@ -9,12 +9,17 @@ import (
 // ContentService 内容
 type ContentService interface {
 	AddText(ownID, title, text string, isPublic bool, tags []string) error
+	GetTextByOwn(ownID string) []models.Content
+
 	GetContentByOwn(ownID string) []models.Content
 	GetContentByID(id string) (models.Content, error)
+	GetPublic(int, int) []PublishData
 	DeleteContentByID(id, userID string) error
 	PatchContentByID(id, title, content string, tags []string, public bool) error
+
 	AddCommentCount(id string, num int) error
 	AddLikeCount(id string, num int) error
+
 	GetUserBaseInfo(id string) (user UserBaseInfo)
 }
 
@@ -43,6 +48,10 @@ func (s *contentService) AddText(ownID, title, text string, isPublic bool, tags 
 
 func (s *contentService) GetContentByID(id string) (models.Content, error) {
 	return s.Model.GetContentByID(id)
+}
+
+func (s *contentService) GetTextByOwn(ownID string) []models.Content {
+	return s.Model.GetContentByOwnAndType(ownID, models.TypeText)
 }
 
 func (s *contentService) GetContentByOwn(ownID string) []models.Content {
@@ -89,4 +98,21 @@ func (s *contentService) AddLikeCount(id string, num int) error {
 
 func (s *contentService) GetUserBaseInfo(id string) (user UserBaseInfo) {
 	return s.Service.User.GetUserBaseInfo(id)
+}
+
+
+type PublishData struct {
+	Data models.Content
+	User UserBaseInfo
+}
+
+func (s *contentService) GetPublic(page, pageSize int) (contents []PublishData) {
+	content := s.Model.GetPageContent(page, pageSize)
+	for i := range content {
+		contents = append(contents, PublishData{
+			Data: content[i],
+			User: s.GetUserBaseInfo(content[i].OwnID.Hex()),
+		})
+	}
+	return
 }

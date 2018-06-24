@@ -12,6 +12,8 @@ type UserService interface {
 	LoginByCode(code string) (userID string, err error)
 	GetUserInfo(id string) (user models.Users, err error)
 	GetUserBaseInfo(id string) (user UserBaseInfo)
+	UpdateUserInfo(id string) error
+	UpdateUserName(id, name string) error
 }
 
 type userService struct {
@@ -83,4 +85,38 @@ func (s *userService) GetUserBaseInfo(id string) (user UserBaseInfo) {
 		s.UserInfo[id] = user
 	}
 	return
+}
+
+func (s *userService) UpdateUserInfo(id string) error {
+	user, err := s.GetUserInfo(id)
+	if err != nil {
+		return err
+	}
+	userInfo, err := s.Violet.GetUserBaseInfo(user.VioletID.Hex(), user.Token)
+	if err != nil {
+		return err
+	}
+	s.UserInfo[id] = UserBaseInfo{
+		Avatar: userInfo.Info.Avatar,
+		Name: user.Info.Name,
+	}
+	return s.Model.SetUserInfo(id, models.UserInfo{
+		Name: user.Info.Name,
+		Avatar: userInfo.Info.Avatar,
+		Bio: userInfo.Info.Bio,
+		Gender: userInfo.Info.Gender,
+	})
+}
+
+func (s *userService) UpdateUserName(id, name string) error {
+	err :=  s.Model.SetUserName(id, name)
+	if err != nil {
+		return err
+	}
+	info := s.GetUserBaseInfo(id)
+	s.UserInfo[id] = UserBaseInfo{
+		Avatar: info.Avatar,
+		Name: name,
+	}
+	return nil
 }

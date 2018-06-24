@@ -127,7 +127,7 @@ func (m *UserModel) SetUserInfo(id string, info UserInfo) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("not_id")
 	}
-	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": info})
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"info": info}})
 }
 
 // SetUserName 设置用户名
@@ -135,7 +135,7 @@ func (m *UserModel) SetUserName(id, name string) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("not_id")
 	}
-	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"name": name}})
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"info.name": name}})
 }
 
 // GetUserByID 根据ID查询用户

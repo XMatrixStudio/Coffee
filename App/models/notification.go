@@ -70,9 +70,9 @@ func (m *NotificationModel) RemoveANotification(user, id string) error {
 
 // GetNotificationsByUser 获取用户所有通知
 func (m *NotificationModel) GetNotificationsByUser(user string) ([]NotificationDetail, error) {
-	var notifications []NotificationDetail
-	err := m.DB.Find(bson.M{"userId": bson.ObjectIdHex(user)}).All(&notifications)
-	return notifications, err
+	var notification Notification
+	err := m.DB.Find(bson.M{"userId": bson.ObjectIdHex(user)}).One(&notification)
+	return notification.Notifications, err
 }
 
 // GetUnreadCountByUser 获取用户未读通知数量
@@ -83,6 +83,6 @@ func (m *NotificationModel) GetUnreadCountByUser(userID string) (count int, err 
 
 func (m *NotificationModel) RemoveUnread(user, sid, tid string) error {
 	return m.DB.Update(
-		bson.M{"userId": bson.ObjectIdHex(user), "notifications.sourceId": sid},
-		bson.M{"$pull": bson.M{"notifications.targetId": tid}})
+		bson.M{"userId": bson.ObjectIdHex(user)},
+		bson.M{"$pull": bson.M{"notifications.targetId": tid,"notifications.sourceId": sid, "notifications.read": false}})
 }

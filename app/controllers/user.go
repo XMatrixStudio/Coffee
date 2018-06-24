@@ -5,6 +5,7 @@ import (
 	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
+	"regexp"
 )
 
 // UsersController Users控制
@@ -97,7 +98,50 @@ func (c *UsersController) GetInfo() (res userInfoRes) {
 	return
 }
 
-func (c *UsersController) PostLogout() string {
+func (c *UsersController) PostInfo() (res CommonRes) {
+	if c.Session.Get("id") == nil {
+		res.State = "not_login"
+		return
+	}
+	err := c.Service.UpdateUserInfo(c.Session.GetString("id"))
+	if err != nil {
+		res.State = err.Error()
+		return
+	}
+	res.State = "success"
+	return
+}
+
+type nameReq struct {
+	Name string `json:"name"`
+}
+func (c *UsersController) PostName() (res CommonRes) {
+	if c.Session.Get("id") == nil {
+		res.State = "not_login"
+		return
+	}
+	req := nameReq{}
+	err := c.Ctx.ReadJSON(&req)
+	if err != nil || req.Name == "" || len(req.Name) > 20 {
+		res.State = "error_name"
+		return
+	}
+	if m, _ := regexp.MatchString(`[\\\/\(\)<|> "'{}:;]`, req.Name); m {
+		res.State = "error_name"
+		return
+	}
+	err = c.Service.UpdateUserName(c.Session.GetString("id"), req.Name)
+	if err != nil {
+		res.State = err.Error()
+		return
+	}
+	res.State = "success"
+	return
+}
+
+
+func (c *UsersController) PostLogout() (res CommonRes) {
 	c.Session.Delete("id")
-	return "success"
+	res.State = "success"
+	return
 }

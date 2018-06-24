@@ -123,6 +123,19 @@ func (m *ContentModel) GetContentByOwn(ownID string) []Content {
 	return content
 }
 
+// GetContentByOwnAndType
+func (m *ContentModel) GetContentByOwnAndType(ownID, contentType string) []Content {
+	if !bson.IsObjectIdHex(ownID) {
+		return nil
+	}
+	var content []Content
+	err := m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID), "type": contentType}).Sort("-editDate").All(&content)
+	if err != nil {
+		return nil
+	}
+	return content
+}
+
 // GetCountByOwn 获取公开内容数量
 func (m *ContentModel) GetCountByOwn(ownID string) (count int, err error) {
 	if !bson.IsObjectIdHex(ownID) {
@@ -133,12 +146,9 @@ func (m *ContentModel) GetCountByOwn(ownID string) (count int, err error) {
 }
 
 // GetPageContent 获取内容指定分页内容集合
-func (m *ContentModel) GetPageContent(eachNum, pageNum int) []Content {
+func (m *ContentModel) GetPageContent(page, pageSize int) []Content {
 	var content []Content
-	err := m.DB.Find(bson.M{"public": true}).Sort("-editDate").Skip(eachNum * (pageNum - 1)).Limit(eachNum).All(&content)
-	if err != nil {
-		return nil
-	}
+	m.DB.Find(bson.M{"public": true}).Sort("-editDate").Skip(pageSize * (page - 1)).Limit(pageSize).All(&content)
 	return content
 }
 

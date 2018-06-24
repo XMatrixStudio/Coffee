@@ -5,7 +5,6 @@ import (
 	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/kataras/iris/sessions"
 	"strconv"
-	"github.com/XMatrixStudio/Coffee/App/models"
 )
 
 // NotificationController Like
@@ -72,7 +71,7 @@ func (c *NotificationController) GetUnread() (res CommonRes) {
 
 type NotificationRes struct {
 	State string
-	Notification []models.NotificationDetail
+	Notification []services.NotificationData
 }
 
 func (c *NotificationController) GetAll() (res NotificationRes) {

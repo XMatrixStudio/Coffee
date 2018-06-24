@@ -64,7 +64,7 @@ func (s *commentService) AddComment(userID, contentID, fatherID, content string,
 	}
 	// 给father发送通知
 	if fatherID != userID {
-		s.Service.Notification.AddNotification(fatherID, "", userID, contentID, models.TypeReply)
+		s.Service.Notification.AddNotification(fatherID, content, userID, contentID, models.TypeReply)
 	}
 	return
 }

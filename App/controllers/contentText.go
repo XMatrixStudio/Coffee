@@ -1,25 +1,19 @@
 package controllers
 
 import (
-	"github.com/XMatrixStudio/Coffee/App/models"
 	"fmt"
 	"github.com/globalsign/mgo/bson"
 )
 
-// ContentRes 内容回复
-type ContentTextRes struct {
-	State string
-	Data  []models.Content
-}
 
 // GetMyContent GET /MyContent 获取指定用户的所有内容
-func (c *ContentController) GetTexts() (res ContentTextRes) {
+func (c *ContentController) GetTexts() (res ContentsRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
 		return
 	}
 	res.State = "success"
-	res.Data = c.Service.GetContentByOwn(c.Session.GetString("id"))
+	res.Data = c.Service.GetTextByOwn(c.Session.GetString("id"))
 	return
 }
 
