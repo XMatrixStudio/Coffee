@@ -6,28 +6,22 @@ import (
 	"html/template"
 )
 
-// GetTexts GET /content/texts 获取指定用户的所有内容
-func (c *ContentController) GetTexts() (res ContentsRes) {
-	if c.Session.Get("id") == nil {
-		res.State = "not_login"
-		return
-	}
-	res.State = "success"
-	res.Data = c.Service.GetTextByUser(c.Session.GetString("id"), false)
-	return
-}
-
+// GetTextsBy GET /content/texts/{id} 获取指定用户的所有Text类型的内容
 func (c *ContentController) GetTextsBy(id string) (res ContentsRes) {
-	if c.Session.Get("id") == nil {
-		res.State = "not_login"
-		return
-	}
-	if !bson.IsObjectIdHex(id) {
-		res.State = "error_req"
+	isOwn := false
+	if id == "self" {
+		if c.Session.Get("id") == nil {
+			res.State = "not_login"
+			return
+		}
+		id = c.Session.GetString("id")
+		isOwn = true
+	} else if !bson.IsObjectIdHex(id) {
+		res.State = "error_id"
 		return
 	}
 	res.State = "success"
-	res.Data = c.Service.GetTextByUser(c.Session.GetString("id"), true)
+	res.Data = c.Service.GetTextByUser(id, !isOwn)
 	return
 }
 

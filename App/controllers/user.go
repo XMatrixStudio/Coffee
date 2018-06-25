@@ -8,6 +8,7 @@ import (
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
 	"html/template"
+	"github.com/globalsign/mgo/bson"
 )
 
 // UsersController Users控制
@@ -62,21 +63,25 @@ type UserInfoRes struct {
 	Name         string
 	Class        int
 	Info         models.UserInfo
-	LikeNum      int64
 	MaxSize      int64    // 存储库使用最大上限 -1为无上限 单位为KB
 	UsedSize     int64    // 存储库已用大小 单位为KB
 	SingleSize   int64    // 单个资源最大上限 -1为无上限
-	FilesClass   []string // 文件分类
-	ContentCount int64    // 内容数量
 }
 
-// GetInfo GET /user/info 获取用户信息
-func (c *UsersController) GetInfo() (res UserInfoRes) {
-	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+func (c *UsersController) GetInfoBy(id string) (res UserInfoRes) {
+	isOwn := false
+	if id == "self" {
+		if c.Session.Get("id") == nil {
+			res.State = "not_login"
+			return
+		}
+		id = c.Session.GetString("id")
+		isOwn = true
+	} else if !bson.IsObjectIdHex(id) {
+		res.State = "error_id"
 		return
 	}
-	user, err := c.Service.GetUserInfo(c.Session.GetString("id"))
+	user, err := c.Service.GetUserInfo(id)
 	if err != nil {
 		res.State = "not_user"
 		return
@@ -86,12 +91,11 @@ func (c *UsersController) GetInfo() (res UserInfoRes) {
 	res.Info = user.Info
 	res.Email = user.Email
 	res.Class = user.Class
-	res.LikeNum = user.LikeNum
-	res.MaxSize = user.MaxSize
-	res.UsedSize = user.UsedSize
-	res.SingleSize = user.SingleSize
-	res.FilesClass = user.FilesClass
-	res.ContentCount = user.ContentCount
+	if isOwn {
+		res.MaxSize = user.MaxSize
+		res.UsedSize = user.UsedSize
+		res.SingleSize = user.SingleSize
+	}
 	return
 }
 

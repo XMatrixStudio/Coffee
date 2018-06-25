@@ -15,7 +15,8 @@ type Gather struct {
 
 // GatherModel 集合数据库
 type GatherModel struct {
-	// FollowDB *mgo.Collection
+	FollowerDB *mgo.Collection
+	FollowingDB *mgo.Collection
 	// ContentLikeDB 点赞[内容]的[用户ID]集合
 	// 点赞某内容的用户， 用于详细页面显示，属于冗余数据
 	ContentLikeDB *mgo.Collection
@@ -37,20 +38,21 @@ func (m *GatherModel) AddLikeToContent(contentID, userID string) error {
 	}
 	return err
 }
-// RemoveLikeFromContent 取消点赞内容
-func (m *GatherModel) RemoveLikeFromContent(contentID, userID string) error {
-	info, err := m.ContentLikeDB.Upsert(bson.M{"id": contentID}, bson.M{"$pull": bson.M{"ids": userID}})
-	if info.Updated == 0 {
-		return errors.New("not found")
-	}
-	return err
-}
 
 // AddLikeToUser
 func (m *GatherModel) AddLikeToUser(contentID, userID string) error {
 	info, err := m.UserLikeDB.Upsert(bson.M{"id": userID}, bson.M{"$addToSet": bson.M{"ids": contentID}})
 	if info.Matched == 1 && info.Updated == 0 {
 		return errors.New("exist")
+	}
+	return err
+}
+
+// RemoveLikeFromContent 取消点赞内容
+func (m *GatherModel) RemoveLikeFromContent(contentID, userID string) error {
+	info, err := m.ContentLikeDB.Upsert(bson.M{"id": contentID}, bson.M{"$pull": bson.M{"ids": userID}})
+	if info.Updated == 0 {
+		return errors.New("not found")
 	}
 	return err
 }
