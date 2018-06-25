@@ -1,11 +1,11 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"fmt"
 )
 
 // Comment 评论
@@ -28,7 +28,7 @@ type CommentModel struct {
 // AddComment 增加评论
 func (m *CommentModel) AddComment(contentID, userID, content, fatherID string, isReply bool) (err error) {
 	if isReply == false {
-		return  m.CommentDB.Insert(&Comment{
+		return m.CommentDB.Insert(&Comment{
 			ID:        bson.NewObjectId(),
 			FatherID:  bson.ObjectIdHex(fatherID),
 			ContentID: bson.ObjectIdHex(contentID),
@@ -37,7 +37,7 @@ func (m *CommentModel) AddComment(contentID, userID, content, fatherID string, i
 			Date:      time.Now().Unix() * 1000,
 		})
 	} else {
-		return  m.ReplyDB.Insert(&Comment{
+		return m.ReplyDB.Insert(&Comment{
 			ID:        bson.NewObjectId(),
 			ContentID: bson.ObjectIdHex(contentID),
 			FatherID:  bson.ObjectIdHex(fatherID),
@@ -49,11 +49,12 @@ func (m *CommentModel) AddComment(contentID, userID, content, fatherID string, i
 
 }
 
-// AddLike 点赞 1或-1
+// AddLikeToComment 给评论点赞
 func (m *CommentModel) AddLikeToComment(id string, num int) (err error) {
 	return m.CommentDB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"likeNum": num}})
 }
 
+// AddLikeToReply 给回复点赞
 func (m *CommentModel) AddLikeToReply(id string, num int) (err error) {
 	return m.ReplyDB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"likeNum": num}})
 }
@@ -63,7 +64,7 @@ func (m *CommentModel) RemoveComment(id string) (err error) {
 	return m.CommentDB.RemoveId(bson.ObjectIdHex(id))
 }
 
-// RemoveComment 删除评论
+// RemoveReply 删除评论
 func (m *CommentModel) RemoveReply(id string) (err error) {
 	return m.ReplyDB.RemoveId(bson.ObjectIdHex(id))
 }

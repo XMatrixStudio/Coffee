@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"regexp"
+
 	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
-	"regexp"
 )
 
 // UsersController Users控制
@@ -35,22 +36,18 @@ func (c *UsersController) PostLogin() (res CommonRes) {
 	req := loginReq{}
 	err := c.Ctx.ReadJSON(&req)
 	if err != nil {
-		res.State = "error"
-		res.Data = "Bad request."
+		res.State = "bad_request"
 		return
 	}
 	if req.State != c.Session.GetString("state") {
-		res.State = "error"
-		res.Data = "State is error."
+		res.State = "error_state"
 		return
 	}
 	userID, err := c.Service.LoginByCode(req.Code)
 	if err != nil {
-		res.State = "error"
-		res.Data = err.Error()
+		res.State = err.Error()
 		return
 	}
-
 	c.Session.Set("id", userID)
 	res.State = "success"
 	return
@@ -58,7 +55,6 @@ func (c *UsersController) PostLogin() (res CommonRes) {
 
 type userInfoRes struct {
 	State        string
-	Data         string
 	Email        string
 	Name         string
 	Class        int
@@ -74,14 +70,12 @@ type userInfoRes struct {
 // GetInfo GET /info 获取用户信息
 func (c *UsersController) GetInfo() (res userInfoRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "error"
-		res.Data = "not_login"
+		res.State = "not_login"
 		return
 	}
 	user, err := c.Service.GetUserInfo(c.Session.GetString("id"))
 	if err != nil {
-		res.State = "error"
-		res.Data = "not_user"
+		res.State = "not_user"
 		return
 	}
 	res.State = "success"
@@ -98,6 +92,7 @@ func (c *UsersController) GetInfo() (res userInfoRes) {
 	return
 }
 
+// PostInfo POST /info 更新用户信息
 func (c *UsersController) PostInfo() (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -115,6 +110,8 @@ func (c *UsersController) PostInfo() (res CommonRes) {
 type nameReq struct {
 	Name string `json:"name"`
 }
+
+// PostName POST /name 更新用户名
 func (c *UsersController) PostName() (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -138,7 +135,6 @@ func (c *UsersController) PostName() (res CommonRes) {
 	res.State = "success"
 	return
 }
-
 
 func (c *UsersController) PostLogout() (res CommonRes) {
 	c.Session.Delete("id")
