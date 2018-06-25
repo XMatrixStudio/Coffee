@@ -2,11 +2,9 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/globalsign/mgo/bson"
 )
 
-
-// GetMyContent GET /MyContent 获取指定用户的所有内容
+// GetTexts GET /content/texts 获取指定用户的所有内容
 func (c *ContentController) GetTexts() (res ContentsRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -17,14 +15,15 @@ func (c *ContentController) GetTexts() (res ContentsRes) {
 	return
 }
 
+// textDataReq 文本内容数据请求
 type textDataReq struct {
 	Title    string   `json:"title"`
 	Content  string   `json:"content"`
 	IsPublic bool     `json:"isPublic"`
-	Tags     []string `json:"tags`
+	Tags     []string `json:"tags"`
 }
 
-// PostText POST /text 增加文本内容
+// PostText POST /content/text 增加文本内容
 func (c *ContentController) PostText() (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -45,24 +44,7 @@ func (c *ContentController) PostText() (res CommonRes) {
 	return
 }
 
-func (c *ContentController) DeleteTextBy(id string) (res CommonRes) {
-	if c.Session.Get("id") == nil {
-		res.State = "not_login"
-		return
-	}
-	if !bson.IsObjectIdHex(id) {
-		res.State = "bad_request"
-		return
-	}
-	err := c.Service.DeleteContentByID(id, c.Session.GetString("id"))
-	if err != nil {
-		res.State = err.Error()
-		return
-	}
-	res.State = "success"
-	return
-}
-
+// PatchTextBy PATCH /content/text/{contentID} 修改指定文本内容
 func (c *ContentController) PatchTextBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"

@@ -1,12 +1,13 @@
 package controllers
 
 import (
+	"strconv"
+
+	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/XMatrixStudio/Coffee/App/services"
+	"github.com/globalsign/mgo/bson"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
-	"github.com/XMatrixStudio/Coffee/App/models"
-	"strconv"
-	"github.com/globalsign/mgo/bson"
 )
 
 // ContentController 内容
@@ -23,13 +24,14 @@ type ContentRes struct {
 	User  services.UserBaseInfo
 }
 
-// ContentRes 内容回复
+// ContentsRes 内容集合回复
 type ContentsRes struct {
 	State string
 	Data  []models.Content
 }
 
-func (c *ContentController) GetContentBy(id string) (res ContentRes) {
+// GetDetailBy GET /content/detail/{contentID} 获取指定内容
+func (c *ContentController) GetDetailBy(id string) (res ContentRes) {
 	if !bson.IsObjectIdHex(id) {
 		res.State = "err_id"
 		return
@@ -49,11 +51,13 @@ func (c *ContentController) GetContentBy(id string) (res ContentRes) {
 	return
 }
 
+// PublishRes 公共内容返回值
 type PublishRes struct {
 	State string
-	Data []services.PublishData
+	Data  []services.PublishData
 }
 
+// GetPublic GET /content/public 获取公共内容
 func (c *ContentController) GetPublic() (res PublishRes) {
 	page, err := strconv.Atoi(c.Ctx.FormValue("page"))
 	if err != nil {
@@ -67,5 +71,24 @@ func (c *ContentController) GetPublic() (res PublishRes) {
 	}
 	res.State = "success"
 	res.Data = c.Service.GetPublic(page, eachPage)
+	return
+}
+
+// DeleteBy DELETE /content/{contentID} 删除指定内容
+func (c *ContentController) DeleteBy(id string) (res CommonRes) {
+	if c.Session.Get("id") == nil {
+		res.State = "not_login"
+		return
+	}
+	if !bson.IsObjectIdHex(id) {
+		res.State = "bad_request"
+		return
+	}
+	err := c.Service.DeleteContentByID(id, c.Session.GetString("id"))
+	if err != nil {
+		res.State = err.Error()
+		return
+	}
+	res.State = "success"
 	return
 }

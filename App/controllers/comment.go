@@ -2,24 +2,26 @@ package controllers
 
 import (
 	"github.com/XMatrixStudio/Coffee/App/services"
+	"github.com/globalsign/mgo/bson"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
-	"github.com/globalsign/mgo/bson"
 )
 
-// ContentController 内容
+// CommentController 评论
 type CommentController struct {
 	Ctx     iris.Context
 	Service services.CommentService
 	Session *sessions.Session
 }
 
-type GetCommentRes struct {
+// CommentRes 评论回复
+type CommentRes struct {
 	State string
 	Data  []services.CommentForContent
 }
 
-func (c *CommentController) GetBy(id string) (res GetCommentRes) {
+// GetBy GET /comment/{contentID} 获取指定内容的评论
+func (c *CommentController) GetBy(id string) (res CommentRes) {
 	if !bson.IsObjectIdHex(id) {
 		res.State = "error_id"
 		return
@@ -29,6 +31,7 @@ func (c *CommentController) GetBy(id string) (res GetCommentRes) {
 	return
 }
 
+// postCommentReq 评论数据请求
 type postCommentReq struct {
 	ContentID string `json:"contentId"`
 	FatherID  string `json:"fatherId"`
@@ -36,6 +39,7 @@ type postCommentReq struct {
 	IsReply   bool   `json:"isReply"`
 }
 
+// Post POST /comment 增加评论
 func (c *CommentController) Post() (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -63,6 +67,7 @@ func (c *CommentController) Post() (res CommonRes) {
 	return
 }
 
+// DeleteBy DELETE /comment/{commentID} 删除指定评论
 func (c *CommentController) DeleteBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"

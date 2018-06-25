@@ -66,7 +66,6 @@ func RunServer(c Config) {
 	like.Register(Service.GetLikeService(), sessionManager.Start)
 	like.Handle(new(controllers.LikeController))
 
-
 	notification := mvc.New(app.Party("/notification"))
 	notification.Register(Service.GetNotificationService(), sessionManager.Start)
 	notification.Handle(new(controllers.NotificationController))

@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"github.com/kataras/iris"
 	"github.com/XMatrixStudio/Coffee/App/services"
-	"github.com/kataras/iris/sessions"
 	"github.com/globalsign/mgo/bson"
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/sessions"
 )
 
 // LikeController Like
@@ -14,10 +14,10 @@ type LikeController struct {
 	Session *sessions.Session
 }
 
-
+// LikeRes 用户点赞数据返回值
 type LikeRes struct {
 	State string
-	Data []string
+	Data  []string
 }
 
 func (c *LikeController) Get() (res LikeRes) {
@@ -37,7 +37,7 @@ func (c *LikeController) Get() (res LikeRes) {
 type likeReq struct {
 	IsContent bool `json:"isContent"`
 	IsComment bool `json:"isComment"`
-	IsReply  bool `json:"isReply"`
+	IsReply   bool `json:"isReply"`
 }
 
 func (c *LikeController) PostBy(id string) (res CommonRes) {
