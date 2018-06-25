@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/globalsign/mgo/bson"
+	"html/template"
 )
 
 // GetTexts GET /content/texts 获取指定用户的所有内容
@@ -50,6 +51,7 @@ func (c *ContentController) PostText() (res CommonRes) {
 		res.State = "bad_request"
 		return
 	}
+	req.Content = template.HTMLEscapeString(req.Content)
 	err = c.Service.AddText(c.Session.GetString("id"), req.Title, req.Content, req.IsPublic, req.Tags)
 	if err != nil {
 		res.State = "error"
@@ -77,6 +79,7 @@ func (c *ContentController) PatchTextBy(id string) (res CommonRes) {
 		res.Data = err.Error()
 		return
 	}
+	req.Content = template.HTMLEscapeString(req.Content)
 	err = c.Service.PatchContentByID(id, req.Title, req.Content, req.Tags, req.IsPublic)
 	if err != nil {
 		res.State = "error"

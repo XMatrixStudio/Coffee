@@ -51,7 +51,7 @@ func (s *contentService) GetContentByID(id string) (models.Content, error) {
 }
 
 func (s *contentService) GetTextByUser(ownID string, public bool) []models.Content {
-	return s.Model.GetContentByOwnAndType(ownID, models.TypeText)
+	return s.Model.GetContentByOwnAndType(ownID, models.TypeText, public)
 }
 
 func (s *contentService) GetContentByOwn(ownID string) []models.Content {

@@ -5,6 +5,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
+	"html/template"
 )
 
 // CommentController 评论
@@ -58,6 +59,8 @@ func (c *CommentController) Post() (res CommonRes) {
 		res.State = "null_content"
 		return
 	}
+	// 过滤字符
+	req.Content = template.HTMLEscapeString(req.Content)
 	err := c.Service.AddComment(c.Session.GetString("id"), req.ContentID, req.FatherID, req.Content, req.IsReply)
 	if err != nil {
 		res.State = err.Error()

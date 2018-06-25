@@ -7,6 +7,7 @@ import (
 	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
+	"html/template"
 )
 
 // UsersController Users控制
@@ -129,6 +130,7 @@ func (c *UsersController) PostName() (res CommonRes) {
 		res.State = "error_name"
 		return
 	}
+	req.Name = template.HTMLEscapeString(req.Name)
 	err = c.Service.UpdateUserName(c.Session.GetString("id"), req.Name)
 	if err != nil {
 		res.State = err.Error()
