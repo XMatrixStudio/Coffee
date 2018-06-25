@@ -10,7 +10,7 @@ type UserService interface {
 	InitViolet(c violetSdk.Config)
 	GetLoginURL(backURL string) (url, state string)
 	LoginByCode(code string) (userID string, err error)
-	GetUserInfo(id string) (user models.Users, err error)
+	GetUserInfo(id string) (user models.User, err error)
 	GetUserBaseInfo(id string) (user UserBaseInfo)
 	UpdateUserInfo(id string) error
 	UpdateUserName(id, name string) error
@@ -56,7 +56,7 @@ func (s *userService) LoginByCode(code string) (userID string, err error) {
 	return
 }
 
-func (s *userService) GetUserInfo(id string) (user models.Users, err error) {
+func (s *userService) GetUserInfo(id string) (user models.User, err error) {
 	user, err = s.Model.GetUserByID(id)
 	return
 }

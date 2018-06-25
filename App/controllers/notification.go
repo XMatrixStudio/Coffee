@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	"github.com/kataras/iris"
-	"github.com/XMatrixStudio/Coffee/App/services"
-	"github.com/kataras/iris/sessions"
 	"strconv"
+
+	"github.com/XMatrixStudio/Coffee/App/services"
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/sessions"
 )
 
 // NotificationController Like
@@ -14,10 +15,12 @@ type NotificationController struct {
 	Session *sessions.Session
 }
 
+// readReq 标记已读请求
 type readReq struct {
 	IsRead bool `json:"isRead"`
 }
 
+// PatchReadBy PATCH /notification/read/{NotificationID} 标记指定通知为已读
 func (c *NotificationController) PatchReadBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -38,7 +41,7 @@ func (c *NotificationController) PatchReadBy(id string) (res CommonRes) {
 	return
 }
 
-
+// DeleteBy DELETE /notificaiton/{NotificationID} 删除指定通知
 func (c *NotificationController) DeleteBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -53,7 +56,7 @@ func (c *NotificationController) DeleteBy(id string) (res CommonRes) {
 	return
 }
 
-
+// GetUnread GET /notification/unerad 获取未读通知数
 func (c *NotificationController) GetUnread() (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -69,11 +72,13 @@ func (c *NotificationController) GetUnread() (res CommonRes) {
 	return
 }
 
+// NotificationRes 通知集合返回值
 type NotificationRes struct {
-	State string
+	State        string
 	Notification []services.NotificationData
 }
 
+// GetAll GET /notification/all 获取用户所有通知
 func (c *NotificationController) GetAll() (res NotificationRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"

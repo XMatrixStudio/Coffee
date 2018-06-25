@@ -48,7 +48,7 @@ func RunServer(c Config) {
 
 	Service := services.NewService(Model)
 
-	users := mvc.New(app.Party("/users"))
+	users := mvc.New(app.Party("/user"))
 	userService := Service.GetUserService()
 	userService.InitViolet(c.Violet)
 	users.Register(userService, sessionManager.Start)

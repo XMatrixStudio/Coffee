@@ -1,14 +1,15 @@
 package models
 
 import (
+	"errors"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"errors"
 )
 
 // 用户类型
 const (
-	ClassBlackUser  int = iota
+	ClassBlackUser int = iota
 	ClassLimitUser
 	ClassNormalUser
 	ClassVerifyUser
@@ -18,7 +19,6 @@ const (
 	ClassSAdmin
 )
 
-// Users 用户基本信息
 /*
 Class 用户类型
 - -2： 黑名单用户
@@ -61,7 +61,8 @@ Size 存储库分配
 - 超级管理员
  - 无上限
 */
-type Users struct {
+// User 用户基本信息
+type User struct {
 	ID           bson.ObjectId `bson:"_id"`          // 用户ID
 	VioletID     bson.ObjectId `bson:"vid"`          // VioletID
 	Email        string        `bson:"email"`        // 用户唯一邮箱
@@ -78,7 +79,7 @@ type Users struct {
 
 // 性别
 const (
-	GenderMan     int = iota
+	GenderMan int = iota
 	GenderWoman
 	GenderUnknown
 )
@@ -103,7 +104,7 @@ func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender 
 		return
 	}
 	newUser = bson.NewObjectId()
-	err = m.DB.Insert(&Users{
+	err = m.DB.Insert(&User{
 		ID:         newUser,
 		VioletID:   bson.ObjectIdHex(vID),
 		Email:      email,
@@ -139,7 +140,7 @@ func (m *UserModel) SetUserName(id, name string) error {
 }
 
 // GetUserByID 根据ID查询用户
-func (m *UserModel) GetUserByID(id string) (user Users, err error) {
+func (m *UserModel) GetUserByID(id string) (user User, err error) {
 	if !bson.IsObjectIdHex(id) {
 		err = errors.New("not_id")
 		return
@@ -149,7 +150,7 @@ func (m *UserModel) GetUserByID(id string) (user Users, err error) {
 }
 
 // GetUserByVID 根据VioletID查询用户
-func (m *UserModel) GetUserByVID(id string) (user Users, err error) {
+func (m *UserModel) GetUserByVID(id string) (user User, err error) {
 	if !bson.IsObjectIdHex(id) {
 		err = errors.New("not_id")
 		return
@@ -228,5 +229,4 @@ func (m *UserModel) DeleteFilesClass(id string, filesClass string) error {
 		return errors.New("not_id")
 	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$pull": bson.M{"filesClass": filesClass}})
-
 }

@@ -16,7 +16,7 @@ type UsersController struct {
 	Session *sessions.Session
 }
 
-// GetLogin GET /login 获取登陆页面链接
+// GetLogin GET /user/login 获取登陆页面链接
 func (c *UsersController) GetLogin() (res CommonRes) {
 	redirectURL := c.Ctx.FormValue("RedirectURL")
 	url, state := c.Service.GetLoginURL(redirectURL)
@@ -26,12 +26,13 @@ func (c *UsersController) GetLogin() (res CommonRes) {
 	return
 }
 
+// loginReq 登陆请求
 type loginReq struct {
 	Code  string `json:"code"`
 	State string `json:"state"`
 }
 
-// PostLogin POST /login 用户登陆
+// PostLogin POST /user/login 用户登陆
 func (c *UsersController) PostLogin() (res CommonRes) {
 	req := loginReq{}
 	err := c.Ctx.ReadJSON(&req)
@@ -53,7 +54,8 @@ func (c *UsersController) PostLogin() (res CommonRes) {
 	return
 }
 
-type userInfoRes struct {
+// UserInfoRes 用户信息返回
+type UserInfoRes struct {
 	State        string
 	Email        string
 	Name         string
@@ -67,8 +69,8 @@ type userInfoRes struct {
 	ContentCount int64    // 内容数量
 }
 
-// GetInfo GET /info 获取用户信息
-func (c *UsersController) GetInfo() (res userInfoRes) {
+// GetInfo GET /user/info 获取用户信息
+func (c *UsersController) GetInfo() (res UserInfoRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
 		return
@@ -92,7 +94,7 @@ func (c *UsersController) GetInfo() (res userInfoRes) {
 	return
 }
 
-// PostInfo POST /info 更新用户信息
+// PostInfo POST /user/info 更新用户信息
 func (c *UsersController) PostInfo() (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -111,7 +113,7 @@ type nameReq struct {
 	Name string `json:"name"`
 }
 
-// PostName POST /name 更新用户名
+// PostName POST /user/name 更新用户名
 func (c *UsersController) PostName() (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -136,6 +138,7 @@ func (c *UsersController) PostName() (res CommonRes) {
 	return
 }
 
+// PostLogout POST /user/logout 退出登陆
 func (c *UsersController) PostLogout() (res CommonRes) {
 	c.Session.Delete("id")
 	res.State = "success"

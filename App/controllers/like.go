@@ -20,6 +20,7 @@ type LikeRes struct {
 	Data  []string
 }
 
+// Get GET /like 获取用户点赞列表
 func (c *LikeController) Get() (res LikeRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -40,6 +41,7 @@ type likeReq struct {
 	IsReply   bool `json:"isReply"`
 }
 
+// PostBy POST /like/{contentID} 对某个内容点赞
 func (c *LikeController) PostBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
@@ -73,7 +75,8 @@ func (c *LikeController) PostBy(id string) (res CommonRes) {
 	return
 }
 
-func (c *LikeController) PutBy(id string) (res CommonRes) {
+// PatchBy PATCH /like/{contentID} 取消用户对某个内容的点赞
+func (c *LikeController) PatchBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
 		return
