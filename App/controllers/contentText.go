@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/globalsign/mgo/bson"
 )
 
 // GetTexts GET /content/texts 获取指定用户的所有内容
@@ -11,7 +12,21 @@ func (c *ContentController) GetTexts() (res ContentsRes) {
 		return
 	}
 	res.State = "success"
-	res.Data = c.Service.GetTextByOwn(c.Session.GetString("id"))
+	res.Data = c.Service.GetTextByUser(c.Session.GetString("id"), false)
+	return
+}
+
+func (c *ContentController) GetTextsBy(id string) (res ContentsRes) {
+	if c.Session.Get("id") == nil {
+		res.State = "not_login"
+		return
+	}
+	if !bson.IsObjectIdHex(id) {
+		res.State = "error_req"
+		return
+	}
+	res.State = "success"
+	res.Data = c.Service.GetTextByUser(c.Session.GetString("id"), true)
 	return
 }
 

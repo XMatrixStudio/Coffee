@@ -9,7 +9,7 @@ import (
 // ContentService 内容
 type ContentService interface {
 	AddText(ownID, title, text string, isPublic bool, tags []string) error
-	GetTextByOwn(ownID string) []models.Content
+	GetTextByUser(ownID string, public bool) []models.Content
 
 	GetContentByOwn(ownID string) []models.Content
 	GetContentByID(id string) (models.Content, error)
@@ -50,7 +50,7 @@ func (s *contentService) GetContentByID(id string) (models.Content, error) {
 	return s.Model.GetContentByID(id)
 }
 
-func (s *contentService) GetTextByOwn(ownID string) []models.Content {
+func (s *contentService) GetTextByUser(ownID string, public bool) []models.Content {
 	return s.Model.GetContentByOwnAndType(ownID, models.TypeText)
 }
 

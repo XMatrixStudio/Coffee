@@ -124,12 +124,17 @@ func (m *ContentModel) GetContentByOwn(ownID string) []Content {
 }
 
 // GetContentByOwnAndType
-func (m *ContentModel) GetContentByOwnAndType(ownID, contentType string) []Content {
+func (m *ContentModel) GetContentByOwnAndType(ownID, contentType string, public bool) []Content {
 	if !bson.IsObjectIdHex(ownID) {
 		return nil
 	}
 	var content []Content
-	err := m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID), "type": contentType}).Sort("-editDate").All(&content)
+	var err error
+	if public {
+		err = m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID), "type": contentType, "public": true}).Sort("-editDate").All(&content)
+	} else {
+		err = m.DB.Find(bson.M{"ownId": bson.ObjectIdHex(ownID), "type": contentType}).Sort("-editDate").All(&content)
+	}
 	if err != nil {
 		return nil
 	}
