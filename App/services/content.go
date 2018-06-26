@@ -1,8 +1,12 @@
 package services
 
 import (
+	"fmt"
+	"mime/multipart"
+	"strings"
+
 	"github.com/XMatrixStudio/Coffee/App/models"
-	"github.com/globalsign/mgo/bson"
+	"github.com/kataras/iris"
 	"github.com/kataras/iris/core/errors"
 )
 
@@ -11,16 +15,17 @@ type ContentService interface {
 	AddText(ownID, title, text string, isPublic bool, tags []string) error
 	GetTextByUser(ownID string, public bool) []models.Content
 
-	GetContentByOwn(ownID string) []models.Content
+	GetContentsByOwn(ownID string) []models.Content
 	GetContentByID(id string) (models.Content, error)
-	GetPublic(int, int) []PublishData
+	GetContentAndUser(id string) (content models.Content, user UserBaseInfo, err error)
+	GetPublicContents(int, int) []PublishData
 	DeleteContentByID(id, userID string) error
 	PatchContentByID(id, title, content string, tags []string, public bool) error
 
 	AddCommentCount(id string, num int) error
 	AddLikeCount(id string, num int) error
 
-	GetUserBaseInfo(id string) (user UserBaseInfo)
+	BeforeSave(ctx iris.Context, file *multipart.FileHeader)
 }
 
 type contentService struct {
@@ -28,33 +33,11 @@ type contentService struct {
 	Service *Service
 }
 
-func (s *contentService) AddText(ownID, title, text string, isPublic bool, tags []string) (err error) {
-	_, err = s.Model.AddContent(models.Content{
-		OwnID:  bson.ObjectIdHex(ownID),
-		Name:   title,
-		Detail: text,
-		Public: isPublic,
-		Tag:    tags,
-		Type:   models.TypeText,
-	})
-	if err != nil {
-		return
-	}
-	for i := range tags {
-		s.Service.Tag.AddTag(ownID, tags[i])
-	}
-	return
-}
-
 func (s *contentService) GetContentByID(id string) (models.Content, error) {
 	return s.Model.GetContentByID(id)
 }
 
-func (s *contentService) GetTextByUser(ownID string, public bool) []models.Content {
-	return s.Model.GetContentByOwnAndType(ownID, models.TypeText, public)
-}
-
-func (s *contentService) GetContentByOwn(ownID string) []models.Content {
+func (s *contentService) GetContentsByOwn(ownID string) []models.Content {
 	return s.Model.GetContentByOwn(ownID)
 }
 
@@ -96,23 +79,48 @@ func (s *contentService) AddLikeCount(id string, num int) error {
 	return s.Model.AddLikeCount(id, num)
 }
 
-func (s *contentService) GetUserBaseInfo(id string) (user UserBaseInfo) {
-	return s.Service.User.GetUserBaseInfo(id)
+func (s *contentService) GetContentAndUser(id string) (content models.Content, user UserBaseInfo, err error) {
+	content, err = s.GetContentByID(id)
+	if err != nil {
+		return
+	}
+	user = s.Service.User.GetUserBaseInfo(content.OwnID.Hex())
+	return
 }
 
-
+// PublishData 公共数据
 type PublishData struct {
 	Data models.Content
 	User UserBaseInfo
 }
 
-func (s *contentService) GetPublic(page, pageSize int) (contents []PublishData) {
+// GetPublicContents 获取公共内容
+func (s *contentService) GetPublicContents(page, pageSize int) (contents []PublishData) {
 	content := s.Model.GetPageContent(page, pageSize)
 	for i := range content {
 		contents = append(contents, PublishData{
 			Data: content[i],
-			User: s.GetUserBaseInfo(content[i].OwnID.Hex()),
+			User: s.Service.User.GetUserBaseInfo(content[i].OwnID.Hex()),
 		})
 	}
 	return
+}
+
+// BeforeSave 处理文件
+func (s *contentService) BeforeSave(ctx iris.Context, file *multipart.FileHeader) {
+
+	ip := ctx.RemoteAddr()
+	// make sure you format the ip in a way
+	// that can be used for a file name (simple case):
+	ip = strings.Replace(ip, ".", "_", -1)
+
+	// you can use the time.Now, to prefix or suffix the files
+	// based on the current time as well, as an exercise.
+	// i.e unixTime :=	time.Now().Unix()
+	// prefix the Filename with the $IP-
+	// no need for more actions, internal uploader will use this
+	// name to save the file into the "./uploads" folder.
+	file.Filename = ip + "-" + file.Filename
+
+	fmt.Println(file.Size)
 }

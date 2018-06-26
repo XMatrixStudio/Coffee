@@ -8,6 +8,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
+	"fmt"
 )
 
 // ContentController 内容
@@ -36,7 +37,7 @@ func (c *ContentController) GetDetailBy(id string) (res ContentRes) {
 		res.State = "err_id"
 		return
 	}
-	content, err := c.Service.GetContentByID(id)
+	content,user, err := c.Service.GetContentAndUser(id)
 	if err != nil {
 		res.State = err.Error()
 		return
@@ -46,7 +47,7 @@ func (c *ContentController) GetDetailBy(id string) (res ContentRes) {
 		return
 	}
 	res.Data = content
-	res.User = c.Service.GetUserBaseInfo(content.OwnID.Hex())
+	res.User = user
 	res.State = "success"
 	return
 }
@@ -70,7 +71,7 @@ func (c *ContentController) GetPublic() (res PublishRes) {
 		return
 	}
 	res.State = "success"
-	res.Data = c.Service.GetPublic(page, eachPage)
+	res.Data = c.Service.GetPublicContents(page, eachPage)
 	return
 }
 
@@ -89,6 +90,14 @@ func (c *ContentController) DeleteBy(id string) (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
+	res.State = "success"
+	return
+}
+
+func (c *ContentController) PostUpload() (res CommonRes) {
+	c.Ctx.SetMaxRequestBodySize(100)
+	n, err := c.Ctx.UploadFormFiles("./upload/", c.Service.BeforeSave)
+	fmt.Println(n, err)
 	res.State = "success"
 	return
 }

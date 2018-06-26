@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/XMatrixStudio/Violet.SDK.Go"
+	"github.com/kataras/iris/core/errors"
 )
 
 // UserService 用户服务层
@@ -14,6 +15,8 @@ type UserService interface {
 	GetUserBaseInfo(id string) (user UserBaseInfo)
 	UpdateUserInfo(id string) error
 	UpdateUserName(id, name string) error
+
+	AddFiles(id string, size int64) error
 }
 
 type userService struct {
@@ -119,4 +122,16 @@ func (s *userService) UpdateUserName(id, name string) error {
 		Name: name,
 	}
 	return nil
+}
+
+func (s *userService) AddFiles(id string, size int64) error {
+	user, err := s.Model.GetUserByID(id)
+	if err != nil {
+		return err
+	}
+	// 容量超過限制
+	if user.UsedSize + size > user.MaxSize {
+		return errors.New("max_size")
+	}
+	return  s.Model.SetUsedSize(id, user.UsedSize + size)
 }

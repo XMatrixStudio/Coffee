@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/globalsign/mgo"
@@ -27,26 +26,20 @@ type CommentModel struct {
 
 // AddComment 增加评论
 func (m *CommentModel) AddComment(contentID, userID, content, fatherID string, isReply bool) (err error) {
-	if isReply == false {
-		return m.CommentDB.Insert(&Comment{
-			ID:        bson.NewObjectId(),
-			FatherID:  bson.ObjectIdHex(fatherID),
-			ContentID: bson.ObjectIdHex(contentID),
-			UserID:    bson.ObjectIdHex(userID),
-			Content:   content,
-			Date:      time.Now().Unix() * 1000,
-		})
+	var targetDB *mgo.Collection
+	if isReply {
+		targetDB = m.ReplyDB
 	} else {
-		return m.ReplyDB.Insert(&Comment{
-			ID:        bson.NewObjectId(),
-			ContentID: bson.ObjectIdHex(contentID),
-			FatherID:  bson.ObjectIdHex(fatherID),
-			UserID:    bson.ObjectIdHex(userID),
-			Content:   content,
-			Date:      time.Now().Unix() * 1000,
-		})
+		targetDB = m.CommentDB
 	}
-
+	return targetDB.Insert(&Comment{
+		ID:        bson.NewObjectId(),
+		FatherID:  bson.ObjectIdHex(fatherID),
+		ContentID: bson.ObjectIdHex(contentID),
+		UserID:    bson.ObjectIdHex(userID),
+		Content:   content,
+		Date:      time.Now().Unix() * 1000,
+	})
 }
 
 // AddLikeToComment 给评论点赞
@@ -72,10 +65,7 @@ func (m *CommentModel) RemoveReply(id string) (err error) {
 // GetCommentByContentID 获取内容的评论
 func (m *CommentModel) GetCommentByContentID(id string) []Comment {
 	var comment []Comment
-	err := m.CommentDB.Find(bson.M{"contentId": bson.ObjectIdHex(id)}).Sort("-date").All(&comment)
-	if err != nil {
-		fmt.Println(err)
-	}
+	m.CommentDB.Find(bson.M{"contentId": bson.ObjectIdHex(id)}).Sort("-date").All(&comment)
 	return comment
 }
 
@@ -95,8 +85,8 @@ func (m *CommentModel) GetReplyByCommentID(id string) (reply []Comment, err erro
 	return
 }
 
-// GetCommentPage 获取评论数目
-func (m *CommentModel) GetCommentPage(id string) (count int) {
+// GetCommentCount 获取评论数目
+func (m *CommentModel) GetCommentCount(id string) (count int) {
 	count, err := m.CommentDB.Find(bson.M{"contentId": bson.ObjectIdHex(id)}).Count()
 	if err != nil {
 		count = -1
@@ -104,6 +94,7 @@ func (m *CommentModel) GetCommentPage(id string) (count int) {
 	return
 }
 
+// DeleteAllByContent
 func (m *CommentModel) DeleteAllByContent(id string) {
 	var comment []Comment
 	err := m.CommentDB.Find(bson.M{"contentId": bson.ObjectIdHex(id)}).All(&comment)

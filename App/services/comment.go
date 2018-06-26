@@ -1,15 +1,16 @@
 package services
 
 import (
-	"github.com/XMatrixStudio/Coffee/App/models"
 	"errors"
+
+	"github.com/XMatrixStudio/Coffee/App/models"
 )
 
 // CommentService 评论
 type CommentService interface {
 	GetComment(id string) (comments []CommentForContent)
 	AddComment(userID, contentID, fatherID, content string, isReply bool) error
-	DeleteComment(id, userId string) error
+	DeleteComment(id, userID string) error
 }
 
 type commentService struct {
@@ -24,7 +25,7 @@ type CommentForContent struct {
 	Replies []ReplyForComment
 }
 
-// CommentForContent 一条评论的回复
+// ReplyForComment 一条评论的回复
 type ReplyForComment struct {
 	Reply  models.Comment
 	User   UserBaseInfo
@@ -55,11 +56,11 @@ func (s *commentService) GetComment(id string) (comments []CommentForContent) {
 }
 
 func (s *commentService) AddComment(userID, contentID, fatherID, content string, isReply bool) (err error) {
-	err =  s.Model.AddComment(contentID, userID, content, fatherID, isReply)
+	err = s.Model.AddComment(contentID, userID, content, fatherID, isReply)
 	if err != nil {
 		return
 	}
-	if !isReply  {
+	if !isReply {
 		s.Service.Content.AddCommentCount(contentID, 1)
 	}
 	// 给father发送通知
@@ -69,7 +70,7 @@ func (s *commentService) AddComment(userID, contentID, fatherID, content string,
 		} else {
 			comment, err := s.Model.GetCommentByID(contentID)
 			if err != nil {
-				return
+				return err
 			}
 			s.Service.Notification.AddNotification(fatherID, content, userID, comment.ContentID.Hex(), models.TypeReply)
 		}
@@ -77,16 +78,15 @@ func (s *commentService) AddComment(userID, contentID, fatherID, content string,
 	return
 }
 
-func (s *commentService) DeleteComment(id, userId string) error {
+func (s *commentService) DeleteComment(id, userID string) error {
 	isReply := false
 	comment, err := s.Model.GetCommentByID(id)
 	if err != nil && err.Error() == "not found" {
 		comment, err = s.Model.GetReplyByID(id)
 		if err != nil {
 			return err
-		} else {
-			isReply = true
 		}
+		isReply = true
 	} else if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (s *commentService) DeleteComment(id, userId string) error {
 			return err
 		}
 		// 是否有删除权限(回复者和评论者和内容拥有者)
-		if comment.UserID.Hex() != userId && commentFather.UserID.Hex() != userId && content.OwnID.Hex() != userId {
+		if comment.UserID.Hex() != userID && commentFather.UserID.Hex() != userID && content.OwnID.Hex() != userID {
 			return errors.New("not_allow")
 		}
 		s.Model.RemoveReply(id)
@@ -109,7 +109,7 @@ func (s *commentService) DeleteComment(id, userId string) error {
 			return err
 		}
 		// 是否有删除权限(评论者和内容拥有者)
-		if comment.UserID.Hex() != userId && comment.FatherID.Hex() != userId {
+		if comment.UserID.Hex() != userID && comment.FatherID.Hex() != userID {
 			return errors.New("not_allow")
 		}
 		// 删除评论下所有回复

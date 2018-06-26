@@ -24,55 +24,99 @@ type GatherModel struct {
 	UserLikeDB *mgo.Collection
 }
 
+// RemoveAllByID 删除与指定内容有关的数据
 func (m *GatherModel) RemoveAllByID(id string) {
 	m.ContentLikeDB.Remove(bson.M{"id": id})
 	m.UserLikeDB.Upsert(nil, bson.M{"$pull": bson.M{"ids": id}})
 }
 
+// removeFromGather 从集合中删除内容
+func (m *GatherModel) removeFromGather(DB *mgo.Collection, mID, cID string) error {
+	info, err := DB.Upsert(bson.M{"id": mID}, bson.M{"$pull": bson.M{"ids": cID}})
+	if info.Updated == 0 {
+		return errors.New("not found")
+	}
+	return err
+}
 
-// AddLikeToContent 增加Like到内容里面
-func (m *GatherModel) AddLikeToContent(contentID, userID string) error {
-	info, err := m.ContentLikeDB.Upsert(bson.M{"id": contentID}, bson.M{"$addToSet": bson.M{"ids": userID}})
+// addTOGather 向集合中添加内容
+func (m *GatherModel) addToGather(DB *mgo.Collection, mID, cID string) error {
+	info, err := DB.Upsert(bson.M{"id": mID}, bson.M{"$addToSet": bson.M{"ids": cID}})
 	if info.Matched == 1 && info.Updated == 0 {
 		return errors.New("exist")
 	}
 	return err
+}
+
+func (m *GatherModel) getGather(DB *mgo.Collection, mID string) (IDs []string, err error) {
+	var gather Gather
+	if  DB.Find(bson.M{"id": mID}).One(&gather) != nil {
+		return
+	}
+	IDs = gather.IDs
+	return
+}
+
+// AddLikeToContent 增加Like到内容里面
+func (m *GatherModel) AddLikeToContent(contentID, userID string) error {
+	return m.addToGather(m.ContentLikeDB, contentID, userID)
 }
 
 // AddLikeToUser
 func (m *GatherModel) AddLikeToUser(contentID, userID string) error {
-	info, err := m.UserLikeDB.Upsert(bson.M{"id": userID}, bson.M{"$addToSet": bson.M{"ids": contentID}})
-	if info.Matched == 1 && info.Updated == 0 {
-		return errors.New("exist")
-	}
-	return err
+	return m.addToGather(m.UserLikeDB, userID, contentID)
+}
+
+// AddUserFollowing 增加用户的关注列表
+func (m *GatherModel) AddUserFollowing(userID, followingID string) error {
+	return m.addToGather(m.FollowingDB, userID, followingID)
+}
+
+// AddUserFollower 增加用户的被关注列表
+func (m *GatherModel) AddUserFollower(userID, followerID string) error {
+	return m.addToGather(m.FollowerDB, userID, followerID)
 }
 
 // RemoveLikeFromContent 取消点赞内容
 func (m *GatherModel) RemoveLikeFromContent(contentID, userID string) error {
-	info, err := m.ContentLikeDB.Upsert(bson.M{"id": contentID}, bson.M{"$pull": bson.M{"ids": userID}})
-	if info.Updated == 0 {
-		return errors.New("not found")
-	}
-	return err
+	return m.removeFromGather(m.ContentLikeDB, contentID, userID)
 }
 
 // RemoveLikeFromUser
 func (m *GatherModel) RemoveLikeFromUser(commentID, userID string) error {
-	info, err := m.UserLikeDB.Upsert(bson.M{"id": userID}, bson.M{"$pull": bson.M{"ids": commentID}})
-	if info.Updated == 0 {
-		return errors.New("not found")
-	}
-	return err
+	return m.removeFromGather(m.UserLikeDB, userID, commentID)
 }
 
+// RemoveFollowing
+func (m *GatherModel) RemoveFollowing(userID, FollowingID string) error {
+	return m.removeFromGather(m.FollowingDB, userID, FollowingID)
+}
+
+// RemoveFollower
+func (m *GatherModel) RemoveFollower(userID, FollowerID string) error {
+	return m.removeFromGather(m.FollowerDB, userID, FollowerID)
+}
 
 // GetUserLikes 获取用户点赞的集合
-func (m *GatherModel) GetUserLikes(userID string) ([]string, error) {
-	var gather Gather
-	err := m.UserLikeDB.Find(bson.M{"id": userID}).One(&gather)
-	if err != nil {
-		return nil, err
-	}
-	return gather.IDs, nil
+func (m *GatherModel) GetUserLikes(userID string) (IDs []string,err error) {
+	IDs, err = m.getGather(m.UserLikeDB, userID)
+	return
+}
+
+// GetContentLikes 获取文档点赞的用户
+func (m *GatherModel) GetContentLikes(contentID string) (IDs []string,err error)  {
+	IDs, err = m.getGather(m.UserLikeDB, contentID)
+	return
+}
+
+// GetFollowing
+func (m *GatherModel) GetFollowing(userID string) (IDs []string,err error) {
+	IDs, err = m.getGather(m.FollowingDB, userID)
+	return
+}
+
+// GetFollower
+func (m *GatherModel) GetFollower(userID string) (IDs []string,err error) {
+	IDs, err = m.getGather(m.FollowerDB, userID)
+	return
 }

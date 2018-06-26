@@ -190,11 +190,11 @@ func (m *UserModel) AddContentCount(id string, add bool) error {
 }
 
 // AddUsedSize 增加已用大小
-func (m *UserModel) AddUsedSize(id string, addSize int64) error {
+func (m *UserModel) SetUsedSize(id string, size int64) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("not_id")
 	}
-	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"usedSize": addSize}})
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"usedSize": size})
 }
 
 // SetUserClass 设置用户类型

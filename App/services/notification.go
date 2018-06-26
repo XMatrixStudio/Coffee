@@ -7,7 +7,7 @@ type NotificationService interface {
 	AddNotification(id, content, sID, tID, typeN string) error
 	GetUserNotification(userID string) (messages []NotificationData, err error)
 	GetUserUnreadCount(userID string) (count int, err error)
-	SetRead(userId, id string ,isRead bool) error
+	SetRead(userID, id string, isRead bool) error
 	RemoveByID(userID, id string) error
 }
 
@@ -16,10 +16,11 @@ type notificationService struct {
 	Service *Service
 }
 
-func (s *notificationService) AddNotification(userId, content, sID, tID, typeN string) error {
-	return s.Model.AddNotification(content, userId, sID, tID, typeN)
+func (s *notificationService) AddNotification(userID, content, sID, tID, typeN string) error {
+	return s.Model.AddNotification(content, userID, sID, tID, typeN)
 }
 
+// NotificationData 带用户信息的通知
 type NotificationData struct {
 	User UserBaseInfo
 	Data models.NotificationDetail
@@ -41,7 +42,7 @@ func (s *notificationService) GetUserUnreadCount(userID string) (count int, err 
 	return
 }
 
-func (s *notificationService) SetRead(userID, id string ,isRead bool) error {
+func (s *notificationService) SetRead(userID, id string, isRead bool) error {
 	return s.Model.ReadANotification(userID, id, isRead)
 }
 

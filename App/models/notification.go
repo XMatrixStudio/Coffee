@@ -16,9 +16,14 @@ type Notification struct {
 
 // 通知类型
 const (
+	// 系统通知
 	TypeSystem = "system"
+	// 点赞通知
 	TypeLike   = "like"
+	// 回复通知
 	TypeReply  = "reply"
+	// 关注通知
+	TypeFollow = "follow"
 )
 
 // NotificationDetail 通知详情
@@ -54,7 +59,7 @@ func (m *NotificationModel) AddNotification(content, user, sourceID, targetID, n
 	return err
 }
 
-// ReadANotification 标记通知
+// ReadANotification 标记通知状态
 func (m *NotificationModel) ReadANotification(user, id string, status bool) error {
 	return m.DB.Update(
 		bson.M{"userId": bson.ObjectIdHex(user), "notifications._id": bson.ObjectIdHex(id)},
@@ -81,6 +86,7 @@ func (m *NotificationModel) GetUnreadCountByUser(userID string) (count int, err 
 	return
 }
 
+// RemoveUnread 移除指定的未读通知
 func (m *NotificationModel) RemoveUnread(user, sid, tid string) error {
 	return m.DB.Update(
 		bson.M{"userId": bson.ObjectIdHex(user)},

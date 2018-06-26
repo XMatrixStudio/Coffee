@@ -29,14 +29,13 @@ func (s *likeService) AddLikeToContent(id, userID string) error {
 		// 增加失败，需要回退结果
 		s.Model.RemoveLikeFromUser(id, userID)
 		return err
-	} else {
-		// 冗余数据
-		s.Model.AddLikeToContent(id, userID)
-		// 给作者发送通知
-		content, err := s.Service.Content.Model.GetContentByID(id)
-		if err == nil && content.OwnID.Hex() != userID {
-			s.Service.Notification.AddNotification(content.OwnID.Hex(), "", userID, id, models.TypeLike)
-		}
+	}
+	// 冗余数据
+	s.Model.AddLikeToContent(id, userID)
+	// 给作者发送通知
+	content, err := s.Service.Content.Model.GetContentByID(id)
+	if err == nil && content.OwnID.Hex() != userID {
+		s.Service.Notification.AddNotification(content.OwnID.Hex(), "", userID, id, models.TypeLike)
 	}
 	return nil
 }
