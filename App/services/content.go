@@ -1,13 +1,9 @@
 package services
 
 import (
-	"fmt"
-	"mime/multipart"
-	"strings"
-
 	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/kataras/iris"
-	"github.com/kataras/iris/core/errors"
+	"errors"
 )
 
 // ContentService 内容
@@ -25,7 +21,7 @@ type ContentService interface {
 	AddCommentCount(id string, num int) error
 	AddLikeCount(id string, num int) error
 
-	BeforeSave(ctx iris.Context, file *multipart.FileHeader)
+	AddAlbum(ctx iris.Context, id string) error
 }
 
 type contentService struct {
@@ -104,23 +100,4 @@ func (s *contentService) GetPublicContents(page, pageSize int) (contents []Publi
 		})
 	}
 	return
-}
-
-// BeforeSave 处理文件
-func (s *contentService) BeforeSave(ctx iris.Context, file *multipart.FileHeader) {
-
-	ip := ctx.RemoteAddr()
-	// make sure you format the ip in a way
-	// that can be used for a file name (simple case):
-	ip = strings.Replace(ip, ".", "_", -1)
-
-	// you can use the time.Now, to prefix or suffix the files
-	// based on the current time as well, as an exercise.
-	// i.e unixTime :=	time.Now().Unix()
-	// prefix the Filename with the $IP-
-	// no need for more actions, internal uploader will use this
-	// name to save the file into the "./uploads" folder.
-	file.Filename = ip + "-" + file.Filename
-
-	fmt.Println(file.Size)
 }

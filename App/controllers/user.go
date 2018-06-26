@@ -58,6 +58,7 @@ func (c *UsersController) PostLogin() (res CommonRes) {
 
 // UserInfoRes 用户信息返回
 type UserInfoRes struct {
+	ID string
 	State        string
 	Email        string
 	Name         string
@@ -87,6 +88,7 @@ func (c *UsersController) GetInfoBy(id string) (res UserInfoRes) {
 		return
 	}
 	res.State = "success"
+	res.ID = user.ID.Hex()
 	res.Name = user.Info.Name
 	res.Info = user.Info
 	res.Email = user.Email

@@ -52,7 +52,7 @@ type Content struct {
 
 const (
 	TypeText = "Text"
-	TypePic  = "Pic"
+	TypeAlbum  = "Album"
 	TypeFilm = "Film"
 	TypeApp  = "App"
 	TypeGame = "Game"

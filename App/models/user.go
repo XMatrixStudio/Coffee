@@ -194,7 +194,7 @@ func (m *UserModel) SetUsedSize(id string, size int64) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("not_id")
 	}
-	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"usedSize": size})
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"usedSize": size}})
 }
 
 // SetUserClass 设置用户类型

@@ -99,8 +99,8 @@ func (s *commentService) DeleteComment(id, userID string) error {
 		if err != nil {
 			return err
 		}
-		// 是否有删除权限(回复者和评论者和内容拥有者)
-		if comment.UserID.Hex() != userID && commentFather.UserID.Hex() != userID && content.OwnID.Hex() != userID {
+		// 是否有删除权限(回复者和内容拥有者)
+		if comment.UserID.Hex() != userID && content.OwnID.Hex() != userID {
 			return errors.New("not_allow")
 		}
 		s.Model.RemoveReply(id)

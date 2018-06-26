@@ -8,7 +8,6 @@ import (
 	"github.com/globalsign/mgo/bson"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
-	"fmt"
 )
 
 // ContentController 内容
@@ -90,14 +89,6 @@ func (c *ContentController) DeleteBy(id string) (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
-	return
-}
-
-func (c *ContentController) PostUpload() (res CommonRes) {
-	c.Ctx.SetMaxRequestBodySize(100)
-	n, err := c.Ctx.UploadFormFiles("./upload/", c.Service.BeforeSave)
-	fmt.Println(n, err)
 	res.State = "success"
 	return
 }
