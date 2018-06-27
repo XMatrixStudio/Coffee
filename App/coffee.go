@@ -11,8 +11,9 @@ import (
 	"github.com/XMatrixStudio/Violet.SDK.Go"
 	"github.com/kataras/iris/mvc"
 	"github.com/kataras/iris/sessions"
+	"github.com/globalsign/mgo/bson"
+	"strings"
 )
-
 
 // Config 配置文件
 type Config struct {
@@ -23,9 +24,11 @@ type Config struct {
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
-	Host string `yaml:"Host"` // 服务器监听地址
-	Port string `yaml:"Port"` // 服务器监听端口
-	Dev  bool   `yaml:"Dev"`  // 是否开发环境
+	Host     string `yaml:"Host"`     // 服务器监听地址
+	Port     string `yaml:"Port"`     // 服务器监听端口
+	Dev      bool   `yaml:"Dev"`      // 是否开发环境
+	ThumbDir string `yaml:"ThumbDir"` // 缩略图文件夹
+	UserDir  string `yaml:"UserDir"`  // 用户数据文件夹
 }
 
 // RunServer 开始运行服务
@@ -56,8 +59,34 @@ func RunServer(c Config) {
 	users.Handle(new(controllers.UsersController))
 
 	content := mvc.New(app.Party("/content"))
-	content.Register(Service.GetContentService(), sessionManager.Start)
+	contentService := Service.GetContentService()
+	contentService.SetThumbDir(c.Server.ThumbDir)
+	contentService.SetUserDir(c.Server.UserDir)
+	content.Register(contentService, sessionManager.Start)
 	content.Handle(new(controllers.ContentController))
+
+	app.Get("file/{fileID: string}/{filePath:string}", func(ctx iris.Context) {
+		s := sessionManager.Start(ctx)
+		fileID := ctx.Params().Get("fileID")
+		filePath := ctx.Params().Get("filePath")
+		if s.Get("id") == nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			return
+		}
+		if !bson.IsObjectIdHex(fileID) {
+			ctx.StatusCode(iris.StatusBadRequest)
+			return
+		}
+		filePath = strings.Replace(filePath, "|", "/", -1)
+		name, err := contentService.GetFile(s.GetString("id"), fileID,  filePath)
+		if err != nil {
+			ctx.StatusCode(iris.StatusBadRequest)
+			return
+		}
+		ctx.SendFile(filePath, name)
+		return
+	})
+
 
 	comment := mvc.New(app.Party("/comment"))
 	comment.Register(Service.GetCommentService(), sessionManager.Start)
@@ -70,6 +99,8 @@ func RunServer(c Config) {
 	notification := mvc.New(app.Party("/notification"))
 	notification.Register(Service.GetNotificationService(), sessionManager.Start)
 	notification.Handle(new(controllers.NotificationController))
+
+	app.StaticWeb("/thumb", c.Server.ThumbDir)
 
 	app.Run(
 		// Starts the web server

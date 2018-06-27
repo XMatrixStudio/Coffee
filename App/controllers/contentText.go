@@ -55,8 +55,8 @@ func (c *ContentController) PostText() (res CommonRes) {
 	return
 }
 
-// PatchTextBy PATCH /content/text/{contentID} 修改指定文本内容
-func (c *ContentController) PatchTextBy(id string) (res CommonRes) {
+// PatchTextBy PATCH /content/all/{contentID} 修改指定文本内容
+func (c *ContentController) PatchAllBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
 		return

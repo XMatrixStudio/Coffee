@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-	"math/rand"
+	"strings"
 )
 
 func main() {
-	fmt.Println(strconv.Itoa(rand.Int()))
+	name := "file23"
+	index := strings.Split(name, "file")
+	fmt.Println(index[1])
 }

@@ -8,8 +8,13 @@ import (
 
 // ContentService 内容
 type ContentService interface {
+	SetThumbDir(path string)
+	SetUserDir(path string)
+
 	AddText(ownID, title, text string, isPublic bool, tags []string) error
 	GetTextByUser(ownID string, public bool) []models.Content
+
+	GetFile(userID, contentID, filePath string) (string, error)
 
 	GetContentsByOwn(ownID string) []models.Content
 	GetContentByID(id string) (models.Content, error)
@@ -21,12 +26,23 @@ type ContentService interface {
 	AddCommentCount(id string, num int) error
 	AddLikeCount(id string, num int) error
 
-	AddAlbum(ctx iris.Context, id string) error
+	AddAlbum(ctx iris.Context, id string, data NewAlbumData) error
+	GetAlbumByUser(ownID string, public bool) []models.Content
 }
 
 type contentService struct {
 	Model   *models.ContentModel
 	Service *Service
+	ThumbDir string
+	UserDir string
+}
+
+func (s *contentService) SetThumbDir(path string) {
+	s.ThumbDir = path
+}
+
+func (s *contentService) SetUserDir (path string) {
+	s.UserDir = path
 }
 
 func (s *contentService) GetContentByID(id string) (models.Content, error) {
@@ -100,4 +116,16 @@ func (s *contentService) GetPublicContents(page, pageSize int) (contents []Publi
 		})
 	}
 	return
+}
+
+
+func (s *contentService) GetFile(userID, contentID, filePath string) (string, error) {
+	content, err := s.Model.GetContentByID(contentID)
+	if err != nil {
+		return "", err
+	}
+	if content.Public == false && userID != content.OwnID.Hex() {
+		return "", err
+	}
+	return s.Model.FindFileInContent(contentID, filePath)
 }

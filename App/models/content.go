@@ -164,3 +164,13 @@ func (m *ContentModel) AddLikeCount(id string, num int) error {
 func (m *ContentModel) AddCommentCount(id string, num int) error {
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"commentNum": num}})
 }
+
+func (m *ContentModel) FindFileInContent(contentID, filePath string) (file string, err error) {
+	res := Content{}
+	err = m.DB.Find(bson.M{"_id": bson.ObjectIdHex(contentID), "album.images.file.file": filePath}).Select(bson.M{"album.images.$.file.title":1}).One(&res)
+	if len(res.Album.Images) != 1 {
+		return "", errors.New("not_found")
+	}
+	file = res.Album.Images[0].File.Title
+	return
+}
