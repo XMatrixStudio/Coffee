@@ -10,7 +10,8 @@ type Service struct {
 	Tag          tagService
 	Content      contentService
 	Comment      commentService
-	Like likeService
+	Like         likeService
+	Follow       followService
 }
 
 // NewService 初始化Service
@@ -35,11 +36,15 @@ func NewService(m *models.Model) *Service {
 		Service: service,
 	}
 	service.Comment = commentService{
-		Model: &m.Comment,
+		Model:   &m.Comment,
 		Service: service,
 	}
 	service.Like = likeService{
-		Model: &m.Gather,
+		Model:   &m.Gather,
+		Service: service,
+	}
+	service.Follow = followService{
+		Model:   &m.Gather,
 		Service: service,
 	}
 	return service
@@ -70,3 +75,7 @@ func (s *Service) GetLikeService() LikeService {
 	return &s.Like
 }
 
+// GetFollowService 关注
+func (s *Service) GetFollowService() FollowService {
+	return &s.Follow
+}

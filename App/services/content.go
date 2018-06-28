@@ -4,6 +4,7 @@ import (
 	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/kataras/iris"
 	"errors"
+	"os"
 )
 
 // ContentService 内容
@@ -68,6 +69,16 @@ func (s *contentService) DeleteContentByID(id, userID string) error {
 	// 删除评论
 	s.Service.Comment.Model.DeleteAllByContent(id)
 	s.Service.Like.Model.RemoveAllByID(id)
+	// 删除资源并返回用户空间
+	var sumSize int64
+	if content.Type == models.TypeAlbum {
+		for _, image := range content.Album.Images {
+			sumSize += image.File.Size
+			os.Remove(image.File.File)
+			os.Remove(s.getThumbDir() + "/" + image.Thumb)
+		}
+	}
+	s.Service.User.AddFiles(content.OwnID.Hex(), -sumSize)
 	return nil
 }
 

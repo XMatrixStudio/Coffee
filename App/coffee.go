@@ -5,14 +5,15 @@ import (
 
 	"time"
 
+	"strings"
+
 	"github.com/XMatrixStudio/Coffee/App/controllers"
 	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/XMatrixStudio/Violet.SDK.Go"
+	"github.com/globalsign/mgo/bson"
 	"github.com/kataras/iris/mvc"
 	"github.com/kataras/iris/sessions"
-	"github.com/globalsign/mgo/bson"
-	"strings"
 )
 
 // Config 配置文件
@@ -78,7 +79,7 @@ func RunServer(c Config) {
 			return
 		}
 		filePath = strings.Replace(filePath, "|", "/", -1)
-		name, err := contentService.GetFile(s.GetString("id"), fileID,  filePath)
+		name, err := contentService.GetFile(s.GetString("id"), fileID, filePath)
 		if err != nil {
 			ctx.StatusCode(iris.StatusBadRequest)
 			return
@@ -86,7 +87,6 @@ func RunServer(c Config) {
 		ctx.SendFile(filePath, name)
 		return
 	})
-
 
 	comment := mvc.New(app.Party("/comment"))
 	comment.Register(Service.GetCommentService(), sessionManager.Start)
