@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	coffee "github.com/XMatrixStudio/Coffee/app"
+	coffee "github.com/XMatrixStudio/Coffee/App"
 	yaml "gopkg.in/yaml.v2"
 )
 
