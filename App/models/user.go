@@ -3,14 +3,20 @@ package models
 import (
 	"errors"
 
+	"time"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"time"
 )
+
+// UserModel 用户数据库
+type UserModel struct {
+	DB *mgo.Collection
+}
 
 // 用户类型
 const (
-	ClassBlackUser  int = iota
+	ClassBlackUser int = iota
 	ClassLimitUser
 	ClassNormalUser
 	ClassVerifyUser
@@ -20,6 +26,14 @@ const (
 	ClassSAdmin
 )
 
+// 性别
+const (
+	GenderMan int = iota
+	GenderWoman
+	GenderUnknown
+)
+
+// User 用户基本信息
 /*
 Class 用户类型
 - -2： 黑名单用户
@@ -62,14 +76,13 @@ Size 存储库分配
 - 超级管理员
  - 无上限
 */
-// User 用户基本信息
 type User struct {
 	ID       bson.ObjectId `bson:"_id"`   // 用户ID
 	VioletID bson.ObjectId `bson:"vid"`   // VioletID
+	Token    string        `bson:"token"` // Violet 访问令牌
 	Email    string        `bson:"email"` // 用户唯一邮箱
 	Class    int           `bson:"class"` // 用户类型
 	Info     UserInfo      `bson:"info"`  // 用户个性信息
-	Token    string        `bson:"token"` // Violet 访问令牌
 
 	MaxSize    int64 `bson:"maxSize"`    // 存储库使用最大上限 -1为无上限 单位为KB
 	UsedSize   int64 `bson:"usedSize"`   // 存储库已用大小 单位为KB
@@ -77,22 +90,15 @@ type User struct {
 
 	FilesClass []string `bson:"filesClass"` // 文件分类
 
-
 	LikeCount      int64     `bson:"likeCount"`      // 被点赞数
-	MaxLikeCount   int64     `bson:"maxLikeCount"`   // 最大被点赞数
+	ContentCount   int64     `bson:"contentCount"`   // 内容数量
+	MaxLikeCount   int64     `bson:"maxLikeCount"`   // 最大被点赞数 （用于统计用户经验）
 	CommentTime    time.Time `bson:"commentTime"`    // 最后一次评论时间
 	ContentTime    time.Time `bson:"contentTime"`    // 最后一次发布内容时间
-	FollowerCount  int64     `bson"followerCount"`   // 被关注数目
+	FollowerCount  int64     `bson:"followerCount"`  // 被关注数目
 	FollowingCount int64     `bson:"followingCount"` // 关注数目
 	Exp            int64     `bson:"exp"`            // 经验
 }
-
-// 性别
-const (
-	GenderMan     int = iota
-	GenderWoman
-	GenderUnknown
-)
 
 // UserInfo 用户个性信息
 type UserInfo struct {
@@ -100,11 +106,6 @@ type UserInfo struct {
 	Avatar string `bson:"avatar"` // 头像URL
 	Bio    string `bson:"bio"`    // 个人简介
 	Gender int    `bson:"gender"` // 性别
-}
-
-// UserModel 用户数据库
-type UserModel struct {
-	DB *mgo.Collection
 }
 
 // AddUser 添加用户
@@ -201,7 +202,7 @@ func (m *UserModel) AddContentCount(id string, add bool) error {
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"contentCount": num}})
 }
 
-// AddUsedSize 增加已用大小
+// SetUsedSize 增加已用大小
 func (m *UserModel) SetUsedSize(id string, size int64) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("not_id")

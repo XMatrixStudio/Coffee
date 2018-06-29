@@ -69,11 +69,13 @@ func (m *CommentModel) GetCommentByContentID(id string) []Comment {
 	return comment
 }
 
+// GetCommentByID ...
 func (m *CommentModel) GetCommentByID(id string) (comment Comment, err error) {
 	err = m.CommentDB.FindId(bson.ObjectIdHex(id)).One(&comment)
 	return
 }
 
+// GetReplyByID ...
 func (m *CommentModel) GetReplyByID(id string) (reply Comment, err error) {
 	err = m.ReplyDB.FindId(bson.ObjectIdHex(id)).One(&reply)
 	return
@@ -94,7 +96,7 @@ func (m *CommentModel) GetCommentCount(id string) (count int) {
 	return
 }
 
-// DeleteAllByContent
+// DeleteAllByContent ...
 func (m *CommentModel) DeleteAllByContent(id string) {
 	var comment []Comment
 	err := m.CommentDB.Find(bson.M{"contentId": bson.ObjectIdHex(id)}).All(&comment)

@@ -1,9 +1,10 @@
 package models
 
 import (
+	"errors"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"errors"
 )
 
 // Gather 集合
@@ -15,7 +16,8 @@ type Gather struct {
 
 // GatherModel 集合数据库
 type GatherModel struct {
-	FollowerDB *mgo.Collection
+	// 关注数据库
+	FollowerDB  *mgo.Collection
 	FollowingDB *mgo.Collection
 	// ContentLikeDB 点赞[内容]的[用户ID]集合
 	// 点赞某内容的用户， 用于详细页面显示，属于冗余数据
@@ -50,7 +52,7 @@ func (m *GatherModel) addToGather(DB *mgo.Collection, mID, cID string) error {
 
 func (m *GatherModel) getGather(DB *mgo.Collection, mID string) (IDs []string, err error) {
 	var gather Gather
-	if  DB.Find(bson.M{"id": mID}).One(&gather) != nil {
+	if DB.Find(bson.M{"id": mID}).One(&gather) != nil {
 		return
 	}
 	IDs = gather.IDs
@@ -62,7 +64,7 @@ func (m *GatherModel) AddLikeToContent(contentID, userID string) error {
 	return m.addToGather(m.ContentLikeDB, contentID, userID)
 }
 
-// AddLikeToUser
+// AddLikeToUser 增加Like到用户集合中
 func (m *GatherModel) AddLikeToUser(contentID, userID string) error {
 	return m.addToGather(m.UserLikeDB, userID, contentID)
 }
@@ -82,41 +84,41 @@ func (m *GatherModel) RemoveLikeFromContent(contentID, userID string) error {
 	return m.removeFromGather(m.ContentLikeDB, contentID, userID)
 }
 
-// RemoveLikeFromUser
+// RemoveLikeFromUser ...
 func (m *GatherModel) RemoveLikeFromUser(commentID, userID string) error {
 	return m.removeFromGather(m.UserLikeDB, userID, commentID)
 }
 
-// RemoveFollowing
+// RemoveFollowing ...
 func (m *GatherModel) RemoveFollowing(userID, FollowingID string) error {
 	return m.removeFromGather(m.FollowingDB, userID, FollowingID)
 }
 
-// RemoveFollower
+// RemoveFollower ...
 func (m *GatherModel) RemoveFollower(userID, FollowerID string) error {
 	return m.removeFromGather(m.FollowerDB, userID, FollowerID)
 }
 
 // GetUserLikes 获取用户点赞的集合
-func (m *GatherModel) GetUserLikes(userID string) (IDs []string,err error) {
+func (m *GatherModel) GetUserLikes(userID string) (IDs []string, err error) {
 	IDs, err = m.getGather(m.UserLikeDB, userID)
 	return
 }
 
 // GetContentLikes 获取文档点赞的用户
-func (m *GatherModel) GetContentLikes(contentID string) (IDs []string,err error)  {
+func (m *GatherModel) GetContentLikes(contentID string) (IDs []string, err error) {
 	IDs, err = m.getGather(m.UserLikeDB, contentID)
 	return
 }
 
-// GetFollowing
-func (m *GatherModel) GetFollowing(userID string) (IDs []string,err error) {
+// GetFollowing ...
+func (m *GatherModel) GetFollowing(userID string) (IDs []string, err error) {
 	IDs, err = m.getGather(m.FollowingDB, userID)
 	return
 }
 
-// GetFollower
-func (m *GatherModel) GetFollower(userID string) (IDs []string,err error) {
+// GetFollower ...
+func (m *GatherModel) GetFollower(userID string) (IDs []string, err error) {
 	IDs, err = m.getGather(m.FollowerDB, userID)
 	return
 }

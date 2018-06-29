@@ -3,9 +3,10 @@ package models
 import (
 	"time"
 
+	"errors"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"errors"
 )
 
 // Content 内容
@@ -50,13 +51,14 @@ type Content struct {
 	App         App           `bson:"app"`         // App/Game类型专属
 }
 
+// 内容类型
 const (
-	TypeText = "Text"
-	TypeAlbum  = "Album"
-	TypeFilm = "Film"
-	TypeApp  = "App"
-	TypeGame = "Game"
-	TypeDoc  = "Doc"
+	TypeText  = "Text"
+	TypeAlbum = "Album"
+	TypeFilm  = "Film"
+	TypeApp   = "App"
+	TypeGame  = "Game"
+	TypeDoc   = "Doc"
 )
 
 // ContentModel 内容数据库
@@ -85,7 +87,7 @@ func (m *ContentModel) RemoveContent(id string) (err error) {
 }
 
 // GetContentByID 根据ID查询内容
-func (m *ContentModel) GetContentByID(id string) (content Content,err error) {
+func (m *ContentModel) GetContentByID(id string) (content Content, err error) {
 	if !bson.IsObjectIdHex(id) {
 		err = errors.New("not_id")
 		return
@@ -103,6 +105,7 @@ func (m *ContentModel) UpdateByID(id string, data Content) (err error) {
 
 }
 
+// DeleteByID ...
 func (m *ContentModel) DeleteByID(id string) (err error) {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("not_id")
@@ -123,7 +126,7 @@ func (m *ContentModel) GetContentByOwn(ownID string) []Content {
 	return content
 }
 
-// GetContentByOwnAndType
+// GetContentByOwnAndType ...
 func (m *ContentModel) GetContentByOwnAndType(ownID, contentType string, public bool) []Content {
 	if !bson.IsObjectIdHex(ownID) {
 		return nil
@@ -157,17 +160,20 @@ func (m *ContentModel) GetPageContent(page, pageSize int) []Content {
 	return content
 }
 
+// AddLikeCount ...
 func (m *ContentModel) AddLikeCount(id string, num int) error {
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"likeNum": num}})
 }
 
+// AddCommentCount ...
 func (m *ContentModel) AddCommentCount(id string, num int) error {
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"commentNum": num}})
 }
 
+// FindFileInContent ...
 func (m *ContentModel) FindFileInContent(contentID, filePath string) (file string, err error) {
 	res := Content{}
-	err = m.DB.Find(bson.M{"_id": bson.ObjectIdHex(contentID), "album.images.file.file": filePath}).Select(bson.M{"album.images.$.file.title":1}).One(&res)
+	err = m.DB.Find(bson.M{"_id": bson.ObjectIdHex(contentID), "album.images.file.file": filePath}).Select(bson.M{"album.images.$.file.title": 1}).One(&res)
 	if len(res.Album.Images) != 1 {
 		return "", errors.New("not_found")
 	}

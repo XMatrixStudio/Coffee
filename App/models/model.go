@@ -15,6 +15,7 @@ type Mongo struct {
 	Name     string `yaml:"Name"`
 }
 
+// Model ...
 type Model struct {
 	Config       Mongo
 	DB           *mgo.Database
