@@ -84,12 +84,7 @@ func (c *NotificationController) GetAll() (res NotificationRes) {
 		res.State = "not_login"
 		return
 	}
-	var err error
-	res.Notification, err = c.Service.GetUserNotification(c.Session.GetString("id"))
-	if err != nil {
-		res.State = err.Error()
-		return
-	}
+	res.Notification, _ = c.Service.GetUserNotification(c.Session.GetString("id"))
 	res.State = "success"
 	return
 }
