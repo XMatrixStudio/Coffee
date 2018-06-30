@@ -1,79 +1,337 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project name="MongoDb" id="Project_32547f3" template="Default" database="MongoDb" >
+<project name="MongoDb" id="Project_5ec9bab" template="Default" database="MongoDb" >
 	<schema name="coffee" catalogname="coffee" >
-		<table name="logs" >
-			<comment><![CDATA[具体日志]]></comment>
+		<table name="comments" >
 			<column name="_id" type="oid" length="800" decimal="0" jt="-8" mandatory="y" autoincrement="y" />
-			<column name="uid" type="string" length="800" decimal="0" jt="12" mandatory="y" />
-			<column name="type" type="string" length="800" decimal="0" jt="12" mandatory="y" >
-				<comment><![CDATA[类型:
-login,
-op,]]></comment>
-			</column>
-			<column name="content" type="map" length="800" decimal="0" jt="4999544" mandatory="y" >
-				<column name="text" type="string" length="800" decimal="0" jt="12" mandatory="y" />
-			</column>
-			<column name="time" type="string" length="800" decimal="0" jt="12" />
+			<column name="contentId" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="fatherId" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="userId" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="date" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+			<column name="content" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="likeNum" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
 			<index name="_id_" unique="PRIMARY_KEY" >
 				<column name="_id" />
 			</index>
+			<fk name="Ref" virtual="y" to_schema="coffee" to_table="contents" >
+				<fk_column name="contentId" pk="_id" />
+			</fk>
+			<fk name="Ref" virtual="y" to_schema="coffee" to_table="users" >
+				<fk_column name="fatherId" pk="_id" />
+				<fk_column name="userId" pk="_id" />
+			</fk>
+		</table>
+		<table name="contents" >
+			<column name="_id" type="oid" length="800" decimal="0" jt="-8" mandatory="y" autoincrement="y" />
+			<column name="name" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="detail" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="ownId" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="publishDate" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+			<column name="editDate" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+			<column name="likeNum" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+			<column name="commentNum" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+			<column name="public" type="boolean" length="800" decimal="0" jt="16" mandatory="y" />
+			<column name="native" type="boolean" length="800" decimal="0" jt="16" mandatory="y" />
+			<column name="type" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="subType" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="remark" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="tag" type="array" length="800" decimal="0" jt="2003" mandatory="y" />
+			<column name="image" type="list" length="800" decimal="0" jt="4999545" mandatory="y" />
+			<column name="append" type="list" length="800" decimal="0" jt="4999545" mandatory="y" />
+			<column name="movie" type="map" length="800" decimal="0" jt="4999544" mandatory="y" >
+				<column name="file" type="map" length="800" decimal="0" jt="4999544" mandatory="y" >
+					<column name="file" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+					<column name="size" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+					<column name="title" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+					<column name="time" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+					<column name="count" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+					<column name="type" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+				</column>
+				<column name="url" type="string" length="800" decimal="0" jt="12" />
+				<column name="Image" type="list" length="800" decimal="0" jt="4999545" />
+				<column name="type" type="string" length="800" decimal="0" jt="12" />
+				<column name="detail" type="string" length="800" decimal="0" jt="12" />
+				<column name="watched" type="boolean" length="800" decimal="0" jt="16" />
+			</column>
+			<column name="album" type="map" length="800" decimal="0" jt="4999544" >
+				<column name="images" type="list" length="800" decimal="0" jt="4999545" >
+					<column name="native" type="boolean" length="800" decimal="0" jt="16" />
+					<column name="file" type="map" length="800" decimal="0" jt="4999544" >
+						<column name="file" type="string" length="800" decimal="0" jt="12" />
+						<column name="size" type="long" length="800" decimal="0" jt="-1" />
+						<column name="title" type="string" length="800" decimal="0" jt="12" />
+						<column name="time" type="long" length="800" decimal="0" jt="-1" />
+						<column name="count" type="long" length="800" decimal="0" jt="-1" />
+						<column name="type" type="string" length="800" decimal="0" jt="12" />
+					</column>
+					<column name="url" type="string" length="800" decimal="0" jt="12" />
+					<column name="thumb" type="string" length="800" decimal="0" jt="12" />
+				</column>
+				<column name="title" type="string" length="800" decimal="0" jt="12" />
+				<column name="time" type="long" length="800" decimal="0" jt="-1" />
+				<column name="location" type="string" length="800" decimal="0" jt="12" />
+			</column>
+			<column name="app" type="map" length="800" decimal="0" jt="4999544" >
+				<column name="file" type="map" length="800" decimal="0" jt="4999544" >
+					<column name="file" type="string" length="800" decimal="0" jt="12" />
+					<column name="size" type="long" length="800" decimal="0" jt="-1" />
+					<column name="title" type="string" length="800" decimal="0" jt="12" />
+					<column name="time" type="long" length="800" decimal="0" jt="-1" />
+					<column name="count" type="long" length="800" decimal="0" jt="-1" />
+					<column name="type" type="string" length="800" decimal="0" jt="12" />
+				</column>
+				<column name="web" type="string" length="800" decimal="0" jt="12" />
+				<column name="url" type="string" length="800" decimal="0" jt="12" />
+				<column name="image" type="list" length="800" decimal="0" jt="4999545" />
+				<column name="version" type="string" length="800" decimal="0" jt="12" />
+			</column>
+			<index name="_id_" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="Ref" virtual="y" to_schema="coffee" to_table="users" >
+				<fk_column name="ownId" pk="_id" />
+			</fk>
+		</table>
+		<table name="like" >
+			<column name="_id" type="oid" length="800" decimal="0" jt="-8" mandatory="y" autoincrement="y" />
+			<column name="id" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="ids" type="array" length="800" decimal="0" jt="2003" mandatory="y" />
+			<index name="_id_" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_like_contents" virtual="y" to_schema="coffee" to_table="contents" >
+				<fk_column name="id" pk="_id" />
+			</fk>
+		</table>
+		<table name="logs" />
+		<table name="notifications" >
+			<column name="_id" type="oid" length="800" decimal="0" jt="-8" mandatory="y" autoincrement="y" />
+			<column name="userId" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="notifications" type="list" length="800" decimal="0" jt="4999545" mandatory="y" >
+				<column name="_id" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+				<column name="time" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+				<column name="content" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+				<column name="sourceId" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+				<column name="targetId" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+				<column name="read" type="boolean" length="800" decimal="0" jt="16" mandatory="y" />
+				<column name="type" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			</column>
+			<index name="_id_" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="Ref" virtual="y" to_schema="coffee" to_table="users" >
+				<fk_column name="userId" pk="_id" />
+			</fk>
+		</table>
+		<table name="reply" >
+			<column name="_id" type="oid" length="800" decimal="0" jt="-8" mandatory="y" autoincrement="y" />
+			<column name="contentId" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="fatherId" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="userId" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="date" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+			<column name="content" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="likeNum" type="long" length="800" decimal="0" jt="-1" mandatory="y" />
+			<index name="_id_" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="Ref" virtual="y" to_schema="coffee" to_table="comments" >
+				<fk_column name="contentId" pk="_id" />
+			</fk>
+			<fk name="Ref" virtual="y" to_schema="coffee" to_table="users" >
+				<fk_column name="fatherId" pk="_id" />
+				<fk_column name="userId" pk="_id" />
+			</fk>
+		</table>
+		<table name="tags" >
+			<column name="_id" type="oid" length="800" decimal="0" jt="-8" mandatory="y" autoincrement="y" />
+			<column name="name" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="userId" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="count" type="integer" length="800" decimal="0" jt="4" mandatory="y" />
+			<index name="_id_" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_tags_users" virtual="y" to_schema="coffee" to_table="users" >
+				<fk_column name="userId" pk="_id" />
+			</fk>
+		</table>
+		<table name="userLike" >
+			<column name="_id" type="oid" length="800" decimal="0" jt="-8" mandatory="y" autoincrement="y" />
+			<column name="id" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="ids" type="array" length="800" decimal="0" jt="2003" mandatory="y" />
+			<index name="_id_" unique="PRIMARY_KEY" >
+				<column name="_id" />
+			</index>
+			<fk name="fk_userlike_users" virtual="y" to_schema="coffee" to_table="users" >
+				<fk_column name="id" pk="_id" />
+			</fk>
 		</table>
 		<table name="users" >
 			<column name="_id" type="oid" length="800" decimal="0" jt="-8" mandatory="y" autoincrement="y" />
-			<column name="email" type="string" jt="12" mandatory="y" >
-				<comment><![CDATA[用户邮箱]]></comment>
-			</column>
-			<column name="name" type="string" jt="12" mandatory="y" >
-				<comment><![CDATA[用户名]]></comment>
-			</column>
+			<column name="vid" type="oid" length="800" decimal="0" jt="-8" mandatory="y" />
+			<column name="email" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+			<column name="class" type="integer" length="800" decimal="0" jt="4" mandatory="y" />
 			<column name="info" type="map" length="800" decimal="0" jt="4999544" mandatory="y" >
+				<column name="name" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+				<column name="avatar" type="string" length="800" decimal="0" jt="12" mandatory="y" />
+				<column name="bio" type="string" length="800" decimal="0" jt="12" mandatory="y" />
 				<column name="gender" type="integer" length="800" decimal="0" jt="4" mandatory="y" />
-				<column name="nikeName" type="string" length="800" decimal="0" jt="12" mandatory="y" />
-				<column name="avatar" type="string" length="800" decimal="0" jt="12" mandatory="y" >
-					<comment><![CDATA[avatar url]]></comment>
-				</column>
 			</column>
-			<column name="token" type="string" jt="12" >
-				<comment><![CDATA[Violet Token]]></comment>
-			</column>
+			<column name="token" type="string" length="800" decimal="0" jt="12" />
+			<column name="maxSize" type="long" length="800" decimal="0" jt="-1" />
+			<column name="usedSize" type="long" length="800" decimal="0" jt="-1" />
+			<column name="singleSize" type="long" length="800" decimal="0" jt="-1" />
+			<column name="filesClass" type="array" length="800" decimal="0" jt="2003" />
+			<column name="likeCount" type="long" length="800" decimal="0" jt="-1" />
+			<column name="maxLikeCount" type="long" length="800" decimal="0" jt="-1" />
+			<column name="commentTime" type="date" length="800" decimal="0" jt="91" />
+			<column name="contentTime" type="date" length="800" decimal="0" jt="91" />
+			<column name="bson&quot;followerCount&quot;" type="long" length="800" decimal="0" jt="-1" />
+			<column name="followingCount" type="long" length="800" decimal="0" jt="-1" />
+			<column name="exp" type="long" length="800" decimal="0" jt="-1" />
 			<index name="_id_" unique="PRIMARY_KEY" >
 				<column name="_id" />
 			</index>
-			<fk name="Fk_users_logs" virtual="y" to_schema="coffee" to_table="logs" >
-				<fk_column name="_id" pk="uid" />
-			</fk>
 		</table>
 	</schema>
 	<connector name="MongoDb" database="MongoDb" driver_class="com.dbschema.MongoJdbcDriver" driver_jar="mongojdbc1.2.jar" driver_desc="Password Authentication &lt;/span&gt;&lt;br&gt;&lt;b&gt;Connect using MongoDb URI using the Advanced tab/enforce custom URI. Details in Help.&lt;br&gt;Connectivity logs are available in Help/ Output Logs.&lt;/b&gt;" host="111.230.240.70" port="23333" instance="coffee" user="coffee" passwd="Wk5jUW5NemVDZmg3WXNWcDZrWEZUbA==" />
-	<layout name="Default Layout" id="Layout_551ce1c" show_relation="columns" >
-		<entity schema="coffee" name="users" color="c8daf5" x="45" y="45" />
-		<entity schema="coffee" name="users" column="info" color="c8daf5" x="210" y="105" />
-		<entity schema="coffee" name="logs" column="content" color="c8daf5" x="240" y="330" />
-		<entity schema="coffee" name="logs" color="00cc99" x="45" y="270" />
-		<browser id="Browse_2abf20b" name="logs" confirm_updates="y" >
-			<browse_table schema="coffee" entity="logs" x="20" y="20" width="965" height="319" />
-		</browser>
+	<layout name="Default Layout" id="Layout_9740a0" show_relation="columns" >
+		<entity schema="coffee" name="contents" color="bfd4f5" x="270" y="210" />
+		<entity schema="coffee" name="comments" color="bfd4f5" x="435" y="105" />
+		<entity schema="coffee" name="notifications" column="notifications" color="bfd4f5" x="1020" y="45" />
+		<entity schema="coffee" name="userLike" color="f5ddbf" x="930" y="165" />
+		<entity schema="coffee" name="notifications" color="bfd4f5" x="885" y="45" />
+		<entity schema="coffee" name="users" column="info" color="bfd4f5" x="1035" y="210" />
+		<entity schema="coffee" name="tags" color="f5ddbf" x="930" y="300" />
+		<entity schema="coffee" name="users" color="bfd4f5" x="705" y="45" />
+		<entity schema="coffee" name="reply" color="bfd4f5" x="555" y="150" />
+		<entity schema="coffee" name="like" color="f5ddbf" x="465" y="345" />
+		<entity schema="coffee" name="contents" column="album" color="c8f5bf" x="435" y="480" />
+		<entity schema="coffee" name="contents" column="album.images" color="c8f5bf" x="540" y="480" />
+		<entity schema="coffee" name="contents" column="album.images.file" color="c8f5bf" x="660" y="480" />
+		<entity schema="coffee" name="contents" column="movie" color="bfd4f5" x="150" y="225" />
+		<entity schema="coffee" name="contents" column="movie.file" color="c8f5bf" x="45" y="225" />
+		<entity schema="coffee" name="contents" column="app" color="c8f5bf" x="165" y="390" />
+		<entity schema="coffee" name="contents" column="app.file" color="c8f5bf" x="45" y="375" />
 	</layout>
-	<layout name="Sample Layout with Tools" id="Layout_36f2b2d" show_column_type="y" show_relation="columns" >
-		<callout x="45" y="45" pointer="NO" >
-			<comment><![CDATA[Double-click any collection or field to edit, right-click to start one of the tools below.
-Use the Relational Data Browse for simultaneously exploring data from multiple collections using virtual relations.
+	<layout name="Sample Layout with Tools" id="Layout_371bd5e" show_column_type="y" show_relation="columns" >
+		<entity schema="coffee" name="comments" color="bfd4f5" x="45" y="75" />
+		<entity schema="coffee" name="contents" color="bfd4f5" x="45" y="270" />
+		<entity schema="coffee" name="contents" column="movie" color="bfd4f5" x="240" y="270" />
+		<entity schema="coffee" name="contents" column="movie.file" color="c8f5bf" x="630" y="210" />
+		<entity schema="coffee" name="contents" column="album" color="c8f5bf" x="495" y="75" />
+		<entity schema="coffee" name="contents" column="album.images" color="c8f5bf" x="495" y="75" />
+		<entity schema="coffee" name="contents" column="album.images.file" color="c8f5bf" x="780" y="75" />
+		<entity schema="coffee" name="contents" column="app" color="c8f5bf" x="495" y="240" />
+		<entity schema="coffee" name="contents" column="app.file" color="c8f5bf" x="630" y="240" />
+		<entity schema="coffee" name="like" color="f5ddbf" x="495" y="510" />
+		<entity schema="coffee" name="logs" color="f5ddbf" x="495" y="630" />
+		<entity schema="coffee" name="notifications" color="bfd4f5" x="45" y="255" />
+		<entity schema="coffee" name="notifications" column="notifications" color="bfd4f5" x="225" y="90" />
+		<entity schema="coffee" name="reply" color="bfd4f5" x="45" y="255" />
+		<entity schema="coffee" name="tags" color="f5ddbf" x="495" y="630" />
+		<entity schema="coffee" name="userLike" color="f5ddbf" x="495" y="630" />
+		<entity schema="coffee" name="users" color="bfd4f5" x="45" y="435" />
+		<entity schema="coffee" name="users" column="info" color="bfd4f5" x="285" y="435" />
+		<callout x="45" y="195" pointer="NO" >
+			<comment><![CDATA[Double-click any table, column or foreign key to edit, right-click to start one of the tools below.
+Use the Relational Data Browse for simultaneously exploring data from multiple tables.
 All tools will be saved to project file and can be reopen.]]></comment>
 		</callout>
-		<script name="Sample Query Editor" id="Editor_21baec2" language="SQL" >
+		<group name="notifications" color="ecf0f7" >
+			<entity schema="coffee" name="notifications" column="notifications" />
+			<entity schema="coffee" name="contents" />
+			<entity schema="coffee" name="contents" column="movie" />
+			<entity schema="coffee" name="users" />
+			<entity schema="coffee" name="users" column="info" />
+			<entity schema="coffee" name="comments" />
+			<entity schema="coffee" name="notifications" />
+			<entity schema="coffee" name="reply" />
+		</group>
+		<group name="file" color="eef7ec" >
+			<entity schema="coffee" name="contents" column="album.images.file" />
+			<entity schema="coffee" name="contents" column="app.file" />
+			<entity schema="coffee" name="contents" column="movie.file" />
+			<entity schema="coffee" name="contents" column="app" />
+			<entity schema="coffee" name="contents" column="album.images" />
+			<entity schema="coffee" name="contents" column="album" />
+		</group>
+		<group name="like" color="f7f3ec" >
+			<entity schema="coffee" name="like" />
+			<entity schema="coffee" name="logs" />
+			<entity schema="coffee" name="tags" />
+			<entity schema="coffee" name="userLike" />
+		</group>
+		<script name="Sample Query Editor" id="Editor_5ea27f2" language="SQL" >
 			<string><![CDATA[// PLACE THE CARET OVER EACH LINE AND PRESS EXECUTE ( F8 )
 
-coffee.info.find()
+coffee.contents.find()
 
 //OR
 
 USE coffee;
-db.info.find()
+db.contents.find()
 
 //OR
 
 USE coffee;
-db.getCollection('info').find()]]></string>
+db.getCollection('contents').find()]]></string>
 		</script>
+		<browser id="Browse_436cb06" name="Sample Relational Data Browse" confirm_updates="y" >
+			<browse_table schema="coffee" entity="contents" x="20" y="20" width="400" height="300" >
+				<browse_table schema="coffee" entity="comments" fk="Ref" x="440" y="20" width="500" height="350" >
+					<browse_table schema="coffee" entity="users" fk="Ref" x="960" y="20" width="500" height="350" record_view="y" />
+				</browse_table>
+			</browse_table>
+		</browser>
+		<query id="Query_2302904" name="Sample Query Builder" >
+			<query_table schema="coffee" name="contents" alias="contents" x="45" y="45" >
+				<column name="_id" />
+				<column name="name" />
+				<column name="detail" />
+				<column name="ownId" />
+				<column name="publishDate" />
+				<column name="editDate" />
+				<column name="likeNum" />
+				<column name="commentNum" />
+				<column name="public" />
+				<column name="native" />
+				<column name="type" />
+				<column name="subType" />
+				<column name="remark" />
+				<column name="tag" />
+				<column name="image" />
+				<column name="append" />
+				<column name="movie" />
+				<column name="album" />
+				<column name="app" />
+				<query_table schema="coffee" name="comments" alias="comments" x="225" y="45" fk="Ref" type="Inner Join" >
+					<column name="_id" />
+					<column name="contentId" />
+					<column name="fatherId" />
+					<column name="userId" />
+					<column name="date" />
+					<column name="content" />
+					<column name="likeNum" />
+					<query_table schema="coffee" name="users" alias="users" x="435" y="45" fk="Ref" type="Inner Join" >
+						<column name="_id" />
+						<column name="vid" />
+						<column name="email" />
+						<column name="class" />
+						<column name="info" />
+						<column name="token" />
+						<column name="maxSize" />
+						<column name="usedSize" />
+						<column name="singleSize" />
+						<column name="filesClass" />
+						<column name="likeCount" />
+						<column name="maxLikeCount" />
+						<column name="commentTime" />
+						<column name="contentTime" />
+						<column name="bson&quot;followerCount&quot;" />
+						<column name="followingCount" />
+						<column name="exp" />
+					</query_table>
+				</query_table>
+			</query_table>
+		</query>
 	</layout>
 </project>
