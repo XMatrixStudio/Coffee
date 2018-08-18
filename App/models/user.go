@@ -108,6 +108,34 @@ type UserInfo struct {
 	Gender int    `bson:"gender"` // 性别
 }
 
+const(
+	LikeCount = "likeCount"
+	ContentCount = "contentCount"
+	FollowerCount = "followerCount"
+	FollowingCount = "followingCount"
+	ExpCount = "exp"
+	MaxLikeCount = "maxLikeCount"
+
+	MaxSize = "maxSize"
+	UsedSize = "usedSize"
+	SingleSize = "singleSize"
+)
+
+func (m *UserModel) ChangeCount(name, id string, num int) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{name: num}})
+}
+
+// SetUsedSize 设置大小
+func (m *UserModel) SetCount(id, name string, size int64) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("not_id")
+	}
+	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{name: size}})
+}
+
 // AddUser 添加用户
 func (m *UserModel) AddUser(vID, token, email, name, avatar, bio string, gender int) (newUser bson.ObjectId, err error) {
 	if !bson.IsObjectIdHex(vID) {
@@ -178,52 +206,12 @@ func (m *UserModel) SetUserToken(id, token string) error {
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"token": token}})
 }
 
-// AddLikeNum 增加或减少点赞数
-func (m *UserModel) AddLikeNum(id string, add bool) error {
-	if !bson.IsObjectIdHex(id) {
-		return errors.New("not_id")
-	}
-	num := -1
-	if add {
-		num = 1
-	}
-	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"likeNum": num}})
-}
-
-// AddContentCount 增加内容数
-func (m *UserModel) AddContentCount(id string, add bool) error {
-	if !bson.IsObjectIdHex(id) {
-		return errors.New("not_id")
-	}
-	num := -1
-	if add {
-		num = 1
-	}
-	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$inc": bson.M{"contentCount": num}})
-}
-
-// SetUsedSize 增加已用大小
-func (m *UserModel) SetUsedSize(id string, size int64) error {
-	if !bson.IsObjectIdHex(id) {
-		return errors.New("not_id")
-	}
-	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"usedSize": size}})
-}
-
 // SetUserClass 设置用户类型
 func (m *UserModel) SetUserClass(id, class string) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("not_id")
 	}
 	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"class": class}})
-}
-
-// SetSize 设置用户容量大小
-func (m *UserModel) SetSize(id string, maxSize, singleSize int64) error {
-	if !bson.IsObjectIdHex(id) {
-		return errors.New("not_id")
-	}
-	return m.DB.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": bson.M{"maxSize": maxSize, "singleSize": singleSize}})
 }
 
 // AddFilesClass 增加文件分类

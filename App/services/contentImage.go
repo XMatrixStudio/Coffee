@@ -21,15 +21,7 @@ func (s *contentService) GetAlbumByUser(ownID string, public bool) []models.Cont
 	return s.Model.GetContentByOwnAndType(ownID, models.TypeAlbum, public)
 }
 
-
-type NewAlbumData struct {
-	Title    string   `form:"title"`
-	Detail   string   `form:"detail"`
-	Tags     []string `form:"tags"`
-	IsPublic bool     `form:"isPublic"`
-}
-
-func (s *contentService) AddAlbum(ctx iris.Context, id string, data NewAlbumData) error {
+func (s *contentService) AddAlbum(ctx iris.Context, id string, data ContentData) error {
 	// 生成资源文件夹
 	dirPath, err := s.getPath(id, models.TypeAlbum)
 	if err != nil {

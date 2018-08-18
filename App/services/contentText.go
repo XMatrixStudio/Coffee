@@ -5,20 +5,20 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
-func (s *contentService) AddText(ownID, title, text string, isPublic bool, tags []string) (err error) {
+func (s *contentService) AddText(ownID string, data ContentData) (err error) {
 	_, err = s.Model.AddContent(models.Content{
 		OwnID:  bson.ObjectIdHex(ownID),
-		Name:   title,
-		Detail: text,
-		Public: isPublic,
-		Tag:    tags,
+		Name:   data.Title,
+		Detail: data.Detail,
+		Public: data.IsPublic,
+		Tag:    data.Tags,
 		Type:   models.TypeText,
 	})
 	if err != nil {
 		return
 	}
-	for i := range tags {
-		s.Service.Tag.AddTag(ownID, tags[i])
+	for i := range data.Tags {
+		s.Service.Tag.AddTag(ownID, data.Tags[i])
 	}
 	return
 }

@@ -133,5 +133,5 @@ func (s *userService) AddFiles(id string, size int64) error {
 	if user.UsedSize + size > user.MaxSize {
 		return errors.New("max_size")
 	}
-	return  s.Model.SetUsedSize(id, user.UsedSize + size)
+	return  s.Model.SetCount(id, models.UsedSize, user.UsedSize + size)
 }

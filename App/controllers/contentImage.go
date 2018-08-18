@@ -13,7 +13,7 @@ func (c *ContentController) PostAlbum() (res CommonRes) {
 		res.State = "not_login"
 		return
 	}
-	req := services.NewAlbumData{}
+	req := services.ContentData{}
 	if err := c.Ctx.ReadForm(&req); err != nil {
 		res.State = err.Error()
 		return

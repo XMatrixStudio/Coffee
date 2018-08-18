@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/globalsign/mgo/bson"
 	"html/template"
+	"github.com/XMatrixStudio/Coffee/App/services"
 )
 
 // GetTextsBy GET /content/texts/{id} 获取指定用户的所有Text类型的内容
@@ -25,28 +26,20 @@ func (c *ContentController) GetTextsBy(id string) (res ContentsRes) {
 	return
 }
 
-// textDataReq 文本内容数据请求
-type textDataReq struct {
-	Title    string   `json:"title"`
-	Content  string   `json:"content"`
-	IsPublic bool     `json:"isPublic"`
-	Tags     []string `json:"tags"`
-}
-
 // PostText POST /content/text 增加文本内容
 func (c *ContentController) PostText() (res CommonRes) {
 	if c.Session.Get("id") == nil {
 		res.State = "not_login"
 		return
 	}
-	req := textDataReq{}
+	req := services.ContentData{}
 	err := c.Ctx.ReadJSON(&req)
-	if err != nil || req.Title == "" || req.Content == "" {
+	if err != nil || req.Title == "" || req.Detail == "" {
 		res.State = "bad_request"
 		return
 	}
-	req.Content = template.HTMLEscapeString(req.Content)
-	err = c.Service.AddText(c.Session.GetString("id"), req.Title, req.Content, req.IsPublic, req.Tags)
+	req.Detail = template.HTMLEscapeString(req.Detail)
+	err = c.Service.AddText(c.Session.GetString("id"), req)
 	if err != nil {
 		res.State = "error"
 		return
@@ -66,15 +59,15 @@ func (c *ContentController) PatchAllBy(id string) (res CommonRes) {
 		res.State = "bad_request"
 		return
 	}
-	req := textDataReq{}
+	req := services.ContentData{}
 	err := c.Ctx.ReadJSON(&req)
-	if err != nil || req.Title == "" || req.Content == "" {
+	if err != nil || req.Title == "" || req.Detail == "" {
 		res.State = "bad_request"
 		res.Data = err.Error()
 		return
 	}
-	req.Content = template.HTMLEscapeString(req.Content)
-	err = c.Service.PatchContentByID(id, req.Title, req.Content, req.Tags, req.IsPublic)
+	req.Detail = template.HTMLEscapeString(req.Detail)
+	err = c.Service.PatchContentByID(id, req)
 	if err != nil {
 		res.State = "error"
 		res.Data = err.Error()

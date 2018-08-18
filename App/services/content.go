@@ -12,7 +12,7 @@ type ContentService interface {
 	SetThumbDir(path string)
 	SetUserDir(path string)
 
-	AddText(ownID, title, text string, isPublic bool, tags []string) error
+	AddText(ownID string, data ContentData) (err error)
 	GetTextByUser(ownID string, public bool) []models.Content
 
 	GetFile(userID, contentID, filePath string) (string, error)
@@ -22,13 +22,16 @@ type ContentService interface {
 	GetContentAndUser(id string) (content models.Content, user UserBaseInfo, err error)
 	GetPublicContents(int, int) []PublishData
 	DeleteContentByID(id, userID string) error
-	PatchContentByID(id, title, content string, tags []string, public bool) error
+	PatchContentByID(id string, data ContentData) error
 
 	AddCommentCount(id string, num int) error
 	AddLikeCount(id string, num int) error
 
-	AddAlbum(ctx iris.Context, id string, data NewAlbumData) error
+	AddAlbum(ctx iris.Context, id string, data ContentData) error
 	GetAlbumByUser(ownID string, public bool) []models.Content
+
+	AddMovie(ctx iris.Context, id string, data ContentData) error
+	GetMovieByUser(ownID string, public bool) []models.Content
 }
 
 type contentService struct {
@@ -36,6 +39,13 @@ type contentService struct {
 	Service *Service
 	ThumbDir string
 	UserDir string
+}
+
+type ContentData struct {
+	Title    string   `form:"title"`
+	Detail   string   `form:"detail"`
+	Tags     []string `form:"tags"`
+	IsPublic bool     `form:"isPublic"`
 }
 
 func (s *contentService) SetThumbDir(path string) {
@@ -82,15 +92,15 @@ func (s *contentService) DeleteContentByID(id, userID string) error {
 	return nil
 }
 
-func (s *contentService) PatchContentByID(id, title, content string, tags []string, public bool) error {
+func (s *contentService) PatchContentByID(id string, data ContentData) error {
 	con, err := s.Model.GetContentByID(id)
 	if err != nil {
 		return err
 	}
-	con.Name = title
-	con.Detail = content
-	con.Tag = tags
-	con.Public = public
+	con.Name = data.Title
+	con.Detail = data.Detail
+	con.Tag = data.Tags
+	con.Public = data.IsPublic
 	return s.Model.UpdateByID(id, con)
 }
 
