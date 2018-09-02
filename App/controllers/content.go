@@ -92,3 +92,7 @@ func (c *ContentController) DeleteBy(id string) (res CommonRes) {
 	res.State = "success"
 	return
 }
+
+func (c *ContentController) PostUpload() string{
+	return "ok"
+}

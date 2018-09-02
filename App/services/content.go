@@ -1,10 +1,11 @@
 package services
 
 import (
-	"github.com/XMatrixStudio/Coffee/App/models"
-	"github.com/kataras/iris"
 	"errors"
 	"os"
+
+	"github.com/XMatrixStudio/Coffee/App/models"
+	"github.com/kataras/iris"
 )
 
 // ContentService 内容
@@ -35,12 +36,13 @@ type ContentService interface {
 }
 
 type contentService struct {
-	Model   *models.ContentModel
-	Service *Service
+	Model    *models.ContentModel
+	Service  *Service
 	ThumbDir string
-	UserDir string
+	UserDir  string
 }
 
+// ContentData 内容数据
 type ContentData struct {
 	Title    string   `form:"title"`
 	Detail   string   `form:"detail"`
@@ -52,7 +54,7 @@ func (s *contentService) SetThumbDir(path string) {
 	s.ThumbDir = path
 }
 
-func (s *contentService) SetUserDir (path string) {
+func (s *contentService) SetUserDir(path string) {
 	s.UserDir = path
 }
 
@@ -138,7 +140,6 @@ func (s *contentService) GetPublicContents(page, pageSize int) (contents []Publi
 	}
 	return
 }
-
 
 func (s *contentService) GetFile(userID, contentID, filePath string) (string, error) {
 	content, err := s.Model.GetContentByID(contentID)

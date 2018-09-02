@@ -1,21 +1,20 @@
 package services
 
 import (
-	"github.com/kataras/iris"
-	"mime/multipart"
-	"fmt"
-	"os"
-	"time"
-	"strconv"
-	"math/rand"
-	"regexp"
-	"strings"
-	"github.com/XMatrixStudio/Coffee/App/models"
 	"io/ioutil"
-	"github.com/kataras/iris/core/errors"
-	"github.com/globalsign/mgo/bson"
-)
+	"math/rand"
+	"mime/multipart"
+	"os"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 
+	"github.com/XMatrixStudio/Coffee/App/models"
+	"github.com/globalsign/mgo/bson"
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/core/errors"
+)
 
 func (s *contentService) GetAlbumByUser(ownID string, public bool) []models.Content {
 	return s.Model.GetContentByOwnAndType(ownID, models.TypeAlbum, public)
@@ -30,12 +29,12 @@ func (s *contentService) AddAlbum(ctx iris.Context, id string, data ContentData)
 	// 生成临时文件夹
 	tmpDir := dirPath + "/" + strconv.FormatInt(time.Now().Unix(), 10) + strconv.Itoa(rand.Intn(100000))
 	if err := pathExistsAndCreate(tmpDir); err != nil {
-		return  err
+		return err
 	}
 	// 生成缩略图文件夹
 	thumbDir := s.getThumbDir()
 	if err := pathExistsAndCreate(thumbDir); err != nil {
-		fmt.Errorf(err.Error())
+		return err
 	}
 
 	// 保存文件到临时文件夹
@@ -65,25 +64,25 @@ func (s *contentService) AddAlbum(ctx iris.Context, id string, data ContentData)
 			if len(index) != 2 {
 				return errors.New("error_name")
 			}
-			thumbFileIndex := indexOfFile(files, "thumb" + index[1])
+			thumbFileIndex := indexOfFile(files, "thumb"+index[1])
 			if thumbFileIndex == -1 {
 				return errors.New("error_name")
 			}
 			fileTargetPath := dirPath + "/" + f.Name()
-			if _, err := copyFile(tmpDir + "/" + f.Name(), fileTargetPath); err != nil {
+			if _, err := copyFile(tmpDir+"/"+f.Name(), fileTargetPath); err != nil {
 				return err
 			}
-			if _, err := copyFile(tmpDir + "/" + files[thumbFileIndex].Name(), thumbDir + "/" + name[0] + ".png"); err != nil {
+			if _, err := copyFile(tmpDir+"/"+files[thumbFileIndex].Name(), thumbDir+"/"+name[0]+".png"); err != nil {
 				return err
 			}
 			Images = append(Images, models.Image{
 				Native: true,
 				File: models.File{
-					File: fileTargetPath,
-					Size: f.Size(),
-					Title: strings.Replace(f.Name(), name[0] + "-" + name[1] + "-", "", -1),
-					Time: time.Now().Unix() * 1000,
-					Type: models.TypeAlbum,
+					File:  fileTargetPath,
+					Size:  f.Size(),
+					Title: strings.Replace(f.Name(), name[0]+"-"+name[1]+"-", "", -1),
+					Time:  time.Now().Unix() * 1000,
+					Type:  models.TypeAlbum,
 				},
 				Thumb: name[0] + ".png",
 			})
@@ -99,14 +98,13 @@ func (s *contentService) AddAlbum(ctx iris.Context, id string, data ContentData)
 		Type:   models.TypeAlbum,
 		Album: models.Album{
 			Images: Images,
-			Title: data.Title,
-			Time: time.Now().Unix() * 1000,
+			Title:  data.Title,
+			Time:   time.Now().Unix() * 1000,
 		},
 	})
 
 	return err
 }
-
 
 // dealWithFile 处理文件
 func (s *contentService) dealWithAlbum(ctx iris.Context, file *multipart.FileHeader) {
@@ -125,8 +123,8 @@ func (s *contentService) dealWithAlbum(ctx iris.Context, file *multipart.FileHea
 	file.Filename = strconv.FormatInt(time.Now().Unix(), 10) + strconv.Itoa(rand.Intn(100000)) + "-" + typeName
 }
 
-func  (s *contentService) getPath(userID, fileType string) (string, error) {
-	dirPath := s.UserDir +  "/" + userID + "/" + fileType
+func (s *contentService) getPath(userID, fileType string) (string, error) {
+	dirPath := s.UserDir + "/" + userID + "/" + fileType
 	if err := pathExistsAndCreate(dirPath); err != nil {
 		return "", err
 	}
@@ -135,8 +133,6 @@ func  (s *contentService) getPath(userID, fileType string) (string, error) {
 
 func (s *contentService) getThumbDir() string {
 	dirPath := s.ThumbDir
-	if err := pathExistsAndCreate(dirPath); err != nil {
-		fmt.Errorf(err.Error())
-	}
+	pathExistsAndCreate(dirPath)
 	return dirPath
 }
