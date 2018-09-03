@@ -5,10 +5,10 @@ import (
 
 	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/XMatrixStudio/Coffee/App/services"
+	"github.com/globalsign/mgo/bson"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
 	"html/template"
-	"github.com/globalsign/mgo/bson"
 )
 
 // UsersController Users控制
@@ -58,36 +58,36 @@ func (c *UsersController) PostLogin() (res CommonRes) {
 
 // UserInfoRes 用户信息返回
 type UserInfoRes struct {
-	ID string
-	State        string
-	Email        string
-	Name         string
-	Class        int
-	Info         models.UserInfo
-	MaxSize      int64    // 存储库使用最大上限 -1为无上限 单位为KB
-	UsedSize     int64    // 存储库已用大小 单位为KB
-	SingleSize   int64    // 单个资源最大上限 -1为无上限
+	ID         string
+	State      string
+	Email      string
+	Name       string
+	Class      int
+	Info       models.UserInfo
+	MaxSize    int64 // 存储库使用最大上限 -1为无上限 单位为KB
+	UsedSize   int64 // 存储库已用大小 单位为KB
+	SingleSize int64 // 单个资源最大上限 -1为无上限
 }
 
 func (c *UsersController) GetInfoBy(id string) (res UserInfoRes) {
 	isOwn := false
 	if id == "self" {
 		if c.Session.Get("id") == nil {
-			res.State = "not_login"
+			res.State = StatusNotLogin
 			return
 		}
 		id = c.Session.GetString("id")
 		isOwn = true
 	} else if !bson.IsObjectIdHex(id) {
-		res.State = "error_id"
+		res.State = StatusBadReq
 		return
 	}
 	user, err := c.Service.GetUserInfo(id)
 	if err != nil {
-		res.State = "not_user"
+		res.State = StatusNotAllow
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	res.ID = user.ID.Hex()
 	res.Name = user.Info.Name
 	res.Info = user.Info
@@ -104,7 +104,7 @@ func (c *UsersController) GetInfoBy(id string) (res UserInfoRes) {
 // PostInfo POST /user/info 更新用户信息
 func (c *UsersController) PostInfo() (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	err := c.Service.UpdateUserInfo(c.Session.GetString("id"))
@@ -112,7 +112,7 @@ func (c *UsersController) PostInfo() (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }
 
@@ -123,17 +123,17 @@ type nameReq struct {
 // PostName POST /user/name 更新用户名
 func (c *UsersController) PostName() (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	req := nameReq{}
 	err := c.Ctx.ReadJSON(&req)
 	if err != nil || req.Name == "" || len(req.Name) > 20 {
-		res.State = "error_name"
+		res.State = StatusBadReq
 		return
 	}
 	if m, _ := regexp.MatchString(`[\\\/\(\)<|> "'{}:;]`, req.Name); m {
-		res.State = "error_name"
+		res.State = StatusBadReq
 		return
 	}
 	req.Name = template.HTMLEscapeString(req.Name)
@@ -142,13 +142,13 @@ func (c *UsersController) PostName() (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }
 
 // PostLogout POST /user/logout 退出登陆
 func (c *UsersController) PostLogout() (res CommonRes) {
 	c.Session.Delete("id")
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }

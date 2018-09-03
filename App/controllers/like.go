@@ -23,7 +23,7 @@ type LikeRes struct {
 // Get GET /like 获取用户点赞列表
 func (c *LikeController) Get() (res LikeRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	var err error
@@ -31,7 +31,7 @@ func (c *LikeController) Get() (res LikeRes) {
 	if err != nil {
 		res.State = err.Error()
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }
 
@@ -44,17 +44,17 @@ type likeReq struct {
 // PostBy POST /like/{contentID} 对某个内容点赞
 func (c *LikeController) PostBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	if !bson.IsObjectIdHex(id) {
-		res.State = "error_id"
+		res.State = StatusBadReq
 		return
 	}
 	req := likeReq{}
 	err := c.Ctx.ReadJSON(&req)
 	if err != nil {
-		res.State = "error_req"
+		res.State = StatusBadReq
 		return
 	}
 	if req.IsContent {
@@ -64,31 +64,31 @@ func (c *LikeController) PostBy(id string) (res CommonRes) {
 	} else if req.IsReply {
 		err = c.Service.AddLikeToComment(id, c.Session.GetString("id"), true)
 	} else {
-		res.State = "error_req"
+		res.State = StatusBadReq
 		return
 	}
 	if err != nil {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }
 
 // PatchBy PATCH /like/{contentID} 取消用户对某个内容的点赞
 func (c *LikeController) PatchBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	if !bson.IsObjectIdHex(id) {
-		res.State = "error_id"
+		res.State = StatusBadReq
 		return
 	}
 	req := likeReq{}
 	err := c.Ctx.ReadJSON(&req)
 	if err != nil {
-		res.State = "error_req"
+		res.State = StatusBadReq
 		return
 	}
 	if req.IsContent {
@@ -98,13 +98,13 @@ func (c *LikeController) PatchBy(id string) (res CommonRes) {
 	} else if req.IsReply {
 		err = c.Service.RemoveLikeFromComment(id, c.Session.GetString("id"), true)
 	} else {
-		res.State = "error_req"
+		res.State = StatusBadReq
 		return
 	}
 	if err != nil {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }

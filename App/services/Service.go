@@ -12,6 +12,7 @@ type Service struct {
 	Comment      commentService
 	Like         likeService
 	Follow       followService
+	File         fileService
 }
 
 // NewService 初始化Service
@@ -47,6 +48,9 @@ func NewService(m *models.Model) *Service {
 		Model:   &m.Gather,
 		Service: service,
 	}
+	service.File = fileService{
+		Service: service,
+	}
 	return service
 }
 
@@ -78,4 +82,9 @@ func (s *Service) GetLikeService() LikeService {
 // GetFollowService 关注
 func (s *Service) GetFollowService() FollowService {
 	return &s.Follow
+}
+
+// GetUploadService 文件上传
+func (s *Service) GetFileService() FileService {
+	return &s.File
 }

@@ -59,6 +59,11 @@ func RunServer(c Config) {
 	users.Register(userService, sessionManager.Start)
 	users.Handle(new(controllers.UsersController))
 
+	file := mvc.New(app.Party("/file"))
+	fileService := Service.GetFileService()
+	file.Register(fileService, sessionManager.Start)
+	file.Handle(new(controllers.FileController))
+
 	content := mvc.New(app.Party("/content"))
 	contentService := Service.GetContentService()
 	contentService.SetThumbDir(c.Server.ThumbDir)

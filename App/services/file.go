@@ -1,50 +1,44 @@
 package services
 
-import (
-	"os"
-	"io"
-	"strings"
-)
+import "github.com/kataras/iris/core/errors"
 
-func copyFile(srcName, dstName string) (written int64, err error) {
-	src, err := os.Open(srcName)
-	if err != nil {
-		return
-	}
-	defer src.Close()
-
-	dst, err := os.Create(dstName)
-	if err != nil {
-		return
-	}
-	defer dst.Close()
-
-	return io.Copy(dst, src)
+type FileService interface {
+	AddFile(data UploadMeta) error
 }
 
+type fileService struct {
+	Service   *Service
+	Uploading map[string]UploadMeta
+}
 
-// 判断文件夹是否存在
-func pathExistsAndCreate(path string) error {
-	if _, err := os.Stat(path); err == nil {
-		return nil
-	} else if os.IsNotExist(err) {
-		if err := os.MkdirAll(path, 0777); err != nil {
-			return err
-		}
+type UploadMeta struct {
+	Name   string      `json:"name"`
+	Size   int64       `json:"size"`
+	MD5    string      `json:"md5"`
+	Chunks []FileChunk `json:"chunks"`
+}
+
+type FileChunk struct {
+	Index   int64  `json:"index"`
+	Size    int64  `json:"size"`
+	MD5     string `json:"md5"`
+	Success bool   `json:"success"`
+}
+
+func (s *fileService) AddFile(data UploadMeta) error {
+	if _, ok := s.Uploading[data.MD5]; ok {
+		return errors.New("exist")
 	}
+	s.Uploading[data.MD5] = data
 	return nil
 }
 
-
-func indexOfFile(s []os.FileInfo, str string) int {
-	for i := range s {
-		name := strings.Split(s[i].Name(), "-")
-		if len(name) < 2 {
-			return -1
-		}
-		if name[1] == str + ".png" {
-			return i
-		}
+func (s *fileService) GetInfo(md5 string) (res UploadMeta, err error) {
+	if meta, ok := s.Uploading[md5]; ok {
+		res = meta
+		return
+	} else {
+		err = errors.New("not_exist")
+		return
 	}
-	return -1
 }

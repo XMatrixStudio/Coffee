@@ -33,21 +33,21 @@ type ContentsRes struct {
 // GetDetailBy GET /content/detail/{contentID} 获取指定内容
 func (c *ContentController) GetDetailBy(id string) (res ContentRes) {
 	if !bson.IsObjectIdHex(id) {
-		res.State = "err_id"
+		res.State = StatusBadReq
 		return
 	}
-	content,user, err := c.Service.GetContentAndUser(id)
+	content, user, err := c.Service.GetContentAndUser(id)
 	if err != nil {
 		res.State = err.Error()
 		return
 	}
 	if content.Public == false && c.Session.Get("id") == nil && c.Session.GetString("id") != content.OwnID.Hex() {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	res.Data = content
 	res.User = user
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }
 
@@ -61,15 +61,15 @@ type PublishRes struct {
 func (c *ContentController) GetPublic() (res PublishRes) {
 	page, err := strconv.Atoi(c.Ctx.FormValue("page"))
 	if err != nil {
-		res.State = "error_page"
+		res.State = StatusBadReq
 		return
 	}
 	eachPage, err := strconv.Atoi(c.Ctx.FormValue("eachPage"))
 	if err != nil {
-		res.State = "error_pageEach"
+		res.State = StatusBadReq
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	res.Data = c.Service.GetPublicContents(page, eachPage)
 	return
 }
@@ -77,11 +77,11 @@ func (c *ContentController) GetPublic() (res PublishRes) {
 // DeleteBy DELETE /content/{contentID} 删除指定内容
 func (c *ContentController) DeleteBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	if !bson.IsObjectIdHex(id) {
-		res.State = "bad_request"
+		res.State = StatusBadReq
 		return
 	}
 	err := c.Service.DeleteContentByID(id, c.Session.GetString("id"))
@@ -89,10 +89,6 @@ func (c *ContentController) DeleteBy(id string) (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
-}
-
-func (c *ContentController) PostUpload() string{
-	return "ok"
 }

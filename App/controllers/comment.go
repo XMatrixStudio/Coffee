@@ -24,10 +24,10 @@ type CommentRes struct {
 // GetBy GET /comment/{contentID} 获取指定内容的评论
 func (c *CommentController) GetBy(id string) (res CommentRes) {
 	if !bson.IsObjectIdHex(id) {
-		res.State = "error_id"
+		res.State = StatusBadReq
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	res.Data = c.Service.GetComment(id)
 	return
 }
@@ -43,20 +43,20 @@ type postCommentReq struct {
 // Post POST /comment 增加评论
 func (c *CommentController) Post() (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	req := postCommentReq{}
 	if err := c.Ctx.ReadJSON(&req); err != nil {
-		res.State = "error_req"
+		res.State = StatusBadReq
 		return
 	}
 	if !(bson.IsObjectIdHex(req.ContentID) && (bson.IsObjectIdHex(req.FatherID) || req.FatherID == "")) {
-		res.State = "error_id"
+		res.State = StatusBadReq
 		return
 	}
 	if req.Content == "" {
-		res.State = "null_content"
+		res.State = StatusBadReq
 		return
 	}
 	// 过滤字符
@@ -66,18 +66,18 @@ func (c *CommentController) Post() (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }
 
 // DeleteBy DELETE /comment/{commentID} 删除指定评论
 func (c *CommentController) DeleteBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	if !bson.IsObjectIdHex(id) {
-		res.State = "error_id"
+		res.State = StatusBadReq
 		return
 	}
 	err := c.Service.DeleteComment(id, c.Session.GetString("id"))
@@ -85,6 +85,6 @@ func (c *CommentController) DeleteBy(id string) (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }

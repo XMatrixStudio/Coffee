@@ -23,13 +23,13 @@ type readReq struct {
 // PatchReadBy PATCH /notification/read/{NotificationID} 标记指定通知为已读
 func (c *NotificationController) PatchReadBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	req := readReq{}
 	err := c.Ctx.ReadJSON(&req)
 	if err != nil {
-		res.State = "err_req"
+		res.State = StatusBadReq
 		return
 	}
 	err = c.Service.SetRead(c.Session.GetString("id"), id, req.IsRead)
@@ -37,14 +37,14 @@ func (c *NotificationController) PatchReadBy(id string) (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }
 
 // DeleteBy DELETE /notificaiton/{NotificationID} 删除指定通知
 func (c *NotificationController) DeleteBy(id string) (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	err := c.Service.RemoveByID(c.Session.GetString("id"), id)
@@ -52,14 +52,14 @@ func (c *NotificationController) DeleteBy(id string) (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }
 
 // GetUnread GET /notification/unerad 获取未读通知数
 func (c *NotificationController) GetUnread() (res CommonRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	count, err := c.Service.GetUserUnreadCount(c.Session.GetString("id"))
@@ -67,7 +67,7 @@ func (c *NotificationController) GetUnread() (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	res.Data = strconv.Itoa(count)
 	return
 }
@@ -81,10 +81,10 @@ type NotificationRes struct {
 // GetAll GET /notification/all 获取用户所有通知
 func (c *NotificationController) GetAll() (res NotificationRes) {
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	res.Notification, _ = c.Service.GetUserNotification(c.Session.GetString("id"))
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }

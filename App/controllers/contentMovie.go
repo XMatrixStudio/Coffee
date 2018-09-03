@@ -6,9 +6,9 @@ import (
 )
 
 func (c *ContentController) PostMovie() (res CommonRes) {
-	c.Ctx.SetMaxRequestBodySize(4* 1024 * 1024 * 1024) // 4G
+	c.Ctx.SetMaxRequestBodySize(4 * 1024 * 1024 * 1024) // 4G
 	if c.Session.Get("id") == nil {
-		res.State = "not_login"
+		res.State = StatusNotLogin
 		return
 	}
 	req := services.ContentData{}
@@ -20,7 +20,7 @@ func (c *ContentController) PostMovie() (res CommonRes) {
 		res.State = err.Error()
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	return
 }
 
@@ -28,16 +28,16 @@ func (c *ContentController) GetMovieBy(id string) (res ContentsRes) {
 	isOwn := false
 	if id == "self" {
 		if c.Session.Get("id") == nil {
-			res.State = "not_login"
+			res.State = StatusNotLogin
 			return
 		}
 		id = c.Session.GetString("id")
 		isOwn = true
 	} else if !bson.IsObjectIdHex(id) {
-		res.State = "error_id"
+		res.State = StatusBadReq
 		return
 	}
-	res.State = "success"
+	res.State = StatusSuccess
 	res.Data = c.Service.GetMovieByUser(id, !isOwn)
 	return
 }

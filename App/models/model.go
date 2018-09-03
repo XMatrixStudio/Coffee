@@ -25,6 +25,7 @@ type Model struct {
 	Gather       GatherModel
 	Notification NotificationModel
 	Tag          TagModel
+	File         FileModel
 }
 
 // InitMongo 初始化数据库
@@ -54,6 +55,7 @@ func (m *Model) InitMongo(conf Mongo) error {
 	m.Gather.UserLikeDB = m.DB.C("userLike")
 	m.Gather.FollowingDB = m.DB.C("following")
 	m.Gather.FollowerDB = m.DB.C("follower")
+	m.File.DB = m.DB.C("files")
 	log.Printf("MongoDB Connect Success!")
 	return nil
 }
