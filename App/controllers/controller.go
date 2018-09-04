@@ -11,4 +11,5 @@ const (
 	StatusBadReq   = "bad_req"
 	StatusNotLogin = "not_login"
 	StatusNotAllow = "not_allow"
+	StatusExist    = "had_exist"
 )

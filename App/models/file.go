@@ -43,14 +43,19 @@ func (m *FileModel) FindByID(id string) (res FileMeta, err error) {
 	return
 }
 
-func (m *FileModel) AddOwn(ownID, fileID string) error {
-	return m.DB.Update(bson.M{"_id": bson.ObjectIdHex(fileID)}, bson.M{"$addToSet": bson.M{"ownId": bson.ObjectIdHex(ownID)}})
+func (m *FileModel) AddOwn(ownID, token string) error {
+	return m.DB.Update(bson.M{"md5": bson.ObjectIdHex(token)}, bson.M{"$addToSet": bson.M{"ownId": bson.ObjectIdHex(ownID)}})
 }
 
-func (m *FileModel) DeleteOwn(ownID, fileID string) error {
-	return m.DB.Update(bson.M{"_id": bson.ObjectIdHex(fileID)}, bson.M{"$pull": bson.M{"ownId": bson.ObjectIdHex(ownID)}})
+func (m *FileModel) DeleteOwn(ownID, token string) error {
+	return m.DB.Update(bson.M{"md5": bson.ObjectIdHex(token)}, bson.M{"$pull": bson.M{"ownId": bson.ObjectIdHex(ownID)}})
 }
 
 func (m *FileModel) DeleteFileMeta(ID string) error {
 	return m.DB.RemoveId(bson.ObjectIdHex(ID))
+}
+
+func (m *FileModel) IsExist(md5 string) bool {
+	n, err := m.DB.Find(bson.M{"md5": md5}).Count()
+	return n != 0 && err == nil
 }

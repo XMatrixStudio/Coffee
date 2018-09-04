@@ -30,6 +30,7 @@ type ServerConfig struct {
 	Dev      bool   `yaml:"Dev"`      // 是否开发环境
 	ThumbDir string `yaml:"ThumbDir"` // 缩略图文件夹
 	UserDir  string `yaml:"UserDir"`  // 用户数据文件夹
+	TempDir  string `yaml:"TempDir"`  // 缓存文件夹
 }
 
 // RunServer 开始运行服务
@@ -61,6 +62,7 @@ func RunServer(c Config) {
 
 	file := mvc.New(app.Party("/file"))
 	fileService := Service.GetFileService()
+	fileService.InitFileService(c.Server.TempDir, c.Server.UserDir)
 	file.Register(fileService, sessionManager.Start)
 	file.Handle(new(controllers.FileController))
 

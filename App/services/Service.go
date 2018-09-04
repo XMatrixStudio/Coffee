@@ -49,6 +49,7 @@ func NewService(m *models.Model) *Service {
 		Service: service,
 	}
 	service.File = fileService{
+		Model:   &m.File,
 		Service: service,
 	}
 	return service
