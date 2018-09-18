@@ -63,7 +63,6 @@ func (c *ContentController) PatchAllBy(id string) (res CommonRes) {
 	err := c.Ctx.ReadJSON(&req)
 	if err != nil || req.Title == "" || req.Detail == "" {
 		res.State = StatusBadReq
-		res.Data = err.Error()
 		return
 	}
 	req.Detail = template.HTMLEscapeString(req.Detail)
