@@ -102,24 +102,31 @@ type User struct {
 
 // UserInfo 用户个性信息
 type UserInfo struct {
-	Name   string `bson:"name"`   // 用户昵称
-	Avatar string `bson:"avatar"` // 头像URL
-	Bio    string `bson:"bio"`    // 个人简介
-	Gender int    `bson:"gender"` // 性别
+	Name     string `bson:"name"`   // 用户昵称
+	Avatar   string `bson:"avatar"` // 头像URL
+	Bio      string `bson:"bio"`    // 个人简介
+	Gender   int    `bson:"gender"` // 性别
+	NikeName string `bson:"nikeName"`
 }
 
-const(
-	LikeCount = "likeCount"
-	ContentCount = "contentCount"
-	FollowerCount = "followerCount"
+const (
+	LikeCount      = "likeCount"
+	ContentCount   = "contentCount"
+	FollowerCount  = "followerCount"
 	FollowingCount = "followingCount"
-	ExpCount = "exp"
-	MaxLikeCount = "maxLikeCount"
+	ExpCount       = "exp"
+	MaxLikeCount   = "maxLikeCount"
 
-	MaxSize = "maxSize"
-	UsedSize = "usedSize"
+	MaxSize    = "maxSize"
+	UsedSize   = "usedSize"
 	SingleSize = "singleSize"
 )
+
+// GetUsers 获取所有用户
+func (m *UserModel) GetUsers() (users []User, err error) {
+	err = m.DB.Find(nil).All(&users)
+	return
+}
 
 func (m *UserModel) ChangeCount(name, id string, num int) error {
 	if !bson.IsObjectIdHex(id) {

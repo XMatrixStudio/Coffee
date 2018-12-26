@@ -8,6 +8,11 @@ import (
 
 // UserService 用户服务层
 type UserService interface {
+	Login(name, password string) (valid bool, data string, err error)
+	Register(name, email, password string) error
+	GetEmailCode(email string) error
+	ValidEmail(email, vCode string) error
+
 	InitViolet(c violetSdk.Config)
 	GetLoginURL(backURL string) (url, state string)
 	LoginByCode(code string) (userID string, err error)
@@ -24,6 +29,57 @@ type userService struct {
 	Model    *models.UserModel
 	UserInfo map[string]UserBaseInfo
 	Service  *Service
+}
+
+// Login ...
+func (s *userService) Login(name, password string) (valid bool, data string, err error) {
+	res, err := s.Violet.Login(name, password)
+	if err != nil {
+		return
+	}
+	valid = res.Valid
+	// 未激活邮箱
+	if !valid {
+		data = res.Email
+		return
+	}
+	// 登陆成功
+	data = res.Code
+	return
+}
+
+func (s *userService) Register(name, email, password string) error {
+	return s.Violet.Register(name, email, password)
+}
+
+func (s *userService) GetEmailCode(email string) error {
+	return s.Violet.GetEmailCode(email)
+}
+
+func (s *userService) ValidEmail(email, vCode string) error {
+	return s.Violet.ValidEmail(email, vCode)
+}
+
+func (s *userService) SetUserInfo(id string, info models.UserInfo) error {
+	if info.NikeName == "new_user" {
+		return errors.New("not_allow")
+	}
+	users, err := s.Model.GetUsers()
+	if err != nil {
+		return errors.New("not_allow")
+	}
+	for _, user := range users {
+		if user.Info.NikeName == info.NikeName {
+			return errors.New("not_allow")
+		}
+	}
+	s.GetUserBaseInfo(id)
+	s.UserInfo[id] = UserBaseInfo{
+		Avatar: info.Avatar,
+		Name:   info.NikeName,
+		Gender: info.Gender,
+	}
+	return s.Model.SetUserInfo(id, info)
 }
 
 func (s *userService) InitViolet(c violetSdk.Config) {
@@ -45,7 +101,7 @@ func (s *userService) LoginByCode(code string) (userID string, err error) {
 	user, err := s.Model.GetUserByVID(res.UserID)
 	if err == nil { // 数据库已存在该用户
 		userID = user.ID.Hex()
-		s.Model.SetUserToken(user.ID.Hex(), res.Token)
+		err = s.Model.SetUserToken(user.ID.Hex(), res.Token)
 	} else if err.Error() == "not found" { // 数据库不存在此用户
 		userNew, errN := s.Violet.GetUserBaseInfo(res.UserID, res.Token)
 		if errN != nil {
@@ -68,6 +124,7 @@ func (s *userService) GetUserInfo(id string) (user models.User, err error) {
 type UserBaseInfo struct {
 	Name   string
 	Avatar string
+	Gender int
 }
 
 // GetUserBaseInfo 从缓存中读取用户基本信息，如果不存在则从数据库中读取
@@ -101,25 +158,25 @@ func (s *userService) UpdateUserInfo(id string) error {
 	}
 	s.UserInfo[id] = UserBaseInfo{
 		Avatar: userInfo.Info.Avatar,
-		Name: user.Info.Name,
+		Name:   user.Info.Name,
 	}
 	return s.Model.SetUserInfo(id, models.UserInfo{
-		Name: user.Info.Name,
+		Name:   user.Info.Name,
 		Avatar: userInfo.Info.Avatar,
-		Bio: userInfo.Info.Bio,
+		Bio:    userInfo.Info.Bio,
 		Gender: userInfo.Info.Gender,
 	})
 }
 
 func (s *userService) UpdateUserName(id, name string) error {
-	err :=  s.Model.SetUserName(id, name)
+	err := s.Model.SetUserName(id, name)
 	if err != nil {
 		return err
 	}
 	info := s.GetUserBaseInfo(id)
 	s.UserInfo[id] = UserBaseInfo{
 		Avatar: info.Avatar,
-		Name: name,
+		Name:   name,
 	}
 	return nil
 }
@@ -130,8 +187,8 @@ func (s *userService) AddFiles(id string, size int64) error {
 		return err
 	}
 	// 容量超過限制
-	if user.UsedSize + size > user.MaxSize {
+	if user.UsedSize+size > user.MaxSize {
 		return errors.New("max_size")
 	}
-	return  s.Model.SetCount(id, models.UsedSize, user.UsedSize + size)
+	return s.Model.SetCount(id, models.UsedSize, user.UsedSize+size)
 }

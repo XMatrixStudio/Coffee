@@ -12,4 +12,6 @@ const (
 	StatusNotLogin = "not_login"
 	StatusNotAllow = "not_allow"
 	StatusExist    = "had_exist"
+	StatusError    = "error"
+	StatusNotValid = "not_invalid"
 )

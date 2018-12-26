@@ -109,14 +109,15 @@ func RunServer(c Config) {
 
 	app.StaticWeb("/thumb", c.Server.ThumbDir)
 
-	app.Run(
+	err = app.Run(
 		// Starts the web server
 		iris.Addr(c.Server.Host+":"+c.Server.Port),
-		// Disables the updater.
-		iris.WithoutVersionChecker,
 		// Ignores err server closed log when CTRL/CMD+C pressed.
 		iris.WithoutServerError(iris.ErrServerClosed),
 		// Enables faster json serialization and more.
 		iris.WithOptimizations,
 	)
+	if err != nil {
+		panic(err)
+	}
 }
