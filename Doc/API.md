@@ -201,43 +201,81 @@ func (c *UsersController) PostName() (res CommonRes)
 
 ## New API
 
+
 [DBUG] 2018/12/26 16:45 GET: /content/file/{param1:string}/{param2:string} -> ContentController.GetFileBy()
+
 [DBUG] 2018/12/26 16:45 GET: /content/detail/{param1:string} -> controllers.ContentController.GetDetailBy()
+
 [DBUG] 2018/12/26 16:45 GET: /file/{fileID: string}/{filePath:string} -> Coffee/App.RunServer.func1()
+
 [DBUG] 2018/12/26 16:45 GET: /content/texts/{param1:string} -> controllers.ContentController.GetTextsBy()
+
 [DBUG] 2018/12/26 16:45 GET: /user/info/{param1:string} -> controllers.UsersController.GetInfoBy()
+
 [DBUG] 2018/12/26 16:45 GET: /content/movie/{param1:string} -> controllers.ContentController.GetMovieBy()
+
 [DBUG] 2018/12/26 16:45 GET: /file/meta/{param1:string} -> controllers.FileController.GetMetaBy()
+
 [DBUG] 2018/12/26 16:45 GET: /content/album/{param1:string} -> controllers.ContentController.GetAlbumBy()
+
 [DBUG] 2018/12/26 16:45 GET: /comment/{param1:string} -> controllers.CommentController.GetBy()
+
 [DBUG] 2018/12/26 16:45 GET: /content/public -> controllers.ContentController.GetPublic()
+
 [DBUG] 2018/12/26 16:45 POST: /user/valid -> controllers.UsersController.PostValid()
+
 [DBUG] 2018/12/26 16:45 POST: /file/merge/{param1:string} -> controllers.FileController.PostMergeBy()
+
 [DBUG] 2018/12/26 16:45 POST: /file/meta -> controllers.FileController.PostMeta()
+
 [DBUG] 2018/12/26 16:45 POST: /file/upload -> controllers.FileController.PostUpload()
+
 [DBUG] 2018/12/26 16:45 DELETE: /content/{param1:string} -> controllers.ContentController.DeleteBy()
+
 [DBUG] 2018/12/26 16:45 POST: /user/register -> controllers.UsersController.PostRegister()
+
 [DBUG] 2018/12/26 16:45 POST: /user/name -> controllers.UsersController.PostName()
+
 [DBUG] 2018/12/26 16:45 POST: /user/logout -> controllers.UsersController.PostLogout()
+
 [DBUG] 2018/12/26 16:45 POST: /user/login/pass -> controllers.UsersController.PostLoginPass()
+
 [DBUG] 2018/12/26 16:45 POST: /user/login -> controllers.UsersController.PostLogin()
+
 [DBUG] 2018/12/26 16:45 POST: /user/info -> controllers.UsersController.PostInfo()
+
 [DBUG] 2018/12/26 16:45 PATCH: /content/all/{param1:string} -> controllers.ContentController.PatchAllBy()
+
 [DBUG] 2018/12/26 16:45 POST: /content/album -> controllers.ContentController.PostAlbum()
+
 [DBUG] 2018/12/26 16:45 POST: /content/movie -> controllers.ContentController.PostMovie()
+
 [DBUG] 2018/12/26 16:45 POST: /content/text -> controllers.ContentController.PostText()
+
 [DBUG] 2018/12/26 16:45 POST: /user/email -> controllers.UsersController.PostEmail()
+
 [DBUG] 2018/12/26 16:45 DELETE: /comment/{param1:string} -> controllers.CommentController.DeleteBy()
+
 [DBUG] 2018/12/26 16:45 GET: /user/login -> controllers.UsersController.GetLogin()
+
 [DBUG] 2018/12/26 16:45 POST: /comment -> controllers.CommentController.Post()
+
 [DBUG] 2018/12/26 16:45 HEAD: /thumb/*file -> github.com/kataras/iris/core/router.StripPrefix.func1()
+
 [DBUG] 2018/12/26 16:45 PATCH: /like/{param1:string} -> controllers.LikeController.PatchBy()
+
 [DBUG] 2018/12/26 16:45 POST: /like/{param1:string} -> controllers.LikeController.PostBy()
+
 [DBUG] 2018/12/26 16:45 DELETE: /notification/{param1:string} -> controllers.NotificationController.DeleteBy()
+
 [DBUG] 2018/12/26 16:45 GET: /notification/all -> controllers.NotificationController.GetAll()
+
 [DBUG] 2018/12/26 16:45 GET: /notification/unread -> controllers.NotificationController.GetUnread()
+
 [DBUG] 2018/12/26 16:45 PATCH: /notification/read/{param1:string} -> controllers.NotificationController.PatchReadBy()
+
 [DBUG] 2018/12/26 16:45 GET: /thumb/*file -> github.com/kataras/iris/core/router.StripPrefix.func1()
+
 [DBUG] 2018/12/26 16:45 GET: /like -> controllers.LikeController.Get()
 
 
