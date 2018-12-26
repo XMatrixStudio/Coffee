@@ -1,0 +1,19 @@
+Mongo:
+  Host: 0.0.0.0
+  Port: 27890
+  User: username
+  Password: password
+  Name: coffee
+Server:
+  Host: 127.0.0.1
+  Port: 30070
+  Dev: true
+  ThumbDir: ./Thumb
+  UserDir: ./UserData
+  TempDir: ./Temp
+Violet:
+  ClientID: xxxxxxxx
+  ClientKey: xxxxxxxxxx
+  ServerHost: https://oauth.xmatrix.studio/api/v2
+  LoginURL: https://oauth.xmatrix.studio/Verify/Authorize
+

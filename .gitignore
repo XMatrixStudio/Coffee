@@ -1,8 +1,8 @@
-Config/*
 *.exe
-*.yaml
+config.yaml
 .idea/*
 userData/*
 thumb/*
 Temp/*
 Doc/*.zip
+api.yaml
