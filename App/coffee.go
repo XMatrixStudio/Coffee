@@ -49,7 +49,7 @@ func RunServer(c Config) {
 
 	sessionManager := sessions.New(sessions.Config{
 		Cookie:  "sessionCoffee",
-		Expires: 24 * time.Hour,
+		Expires: 15 * 24 * time.Hour,
 	})
 
 	Service := services.NewService(Model)
