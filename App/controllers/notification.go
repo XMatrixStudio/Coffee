@@ -4,8 +4,8 @@ import (
 	"strconv"
 
 	"github.com/XMatrixStudio/Coffee/App/services"
-	"github.com/kataras/iris/sessions"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/sessions"
 )
 
 // NotificationController Like

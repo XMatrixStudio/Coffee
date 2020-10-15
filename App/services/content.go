@@ -31,8 +31,8 @@ type ContentService interface {
 	AddAlbum(ctx iris.Context, id string, data ContentData) error
 	GetAlbumByUser(ownID string, public bool) []models.Content
 
-	AddMovie(ctx iris.Context, id string, data ContentData) error
-	GetMovieByUser(ownID string, public bool) []models.Content
+	// AddMovie(ctx iris.Context, id string, data ContentData) error
+	// GetMovieByUser(ownID string, public bool) []models.Content
 }
 
 type contentService struct {

@@ -107,7 +107,7 @@ func RunServer(c Config) {
 	notification.Register(Service.GetNotificationService(), sessionManager.Start)
 	notification.Handle(new(controllers.NotificationController))
 
-	app.HandleDir("/thumb", iris.Dir(c.Server.ThumbDir))
+	app.HandleDir("/thumb", c.Server.ThumbDir)
 
 	err = app.Run(
 		// Starts the web server
