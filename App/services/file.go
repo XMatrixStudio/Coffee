@@ -3,9 +3,9 @@ package services
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/XMatrixStudio/Coffee/App/models"
-	"github.com/kataras/iris/core/errors"
 	"io"
 	"mime/multipart"
 	"os"

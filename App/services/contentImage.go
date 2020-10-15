@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"io/ioutil"
 	"math/rand"
 	"mime/multipart"
@@ -13,7 +14,6 @@ import (
 	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/globalsign/mgo/bson"
 	"github.com/kataras/iris"
-	"github.com/kataras/iris/core/errors"
 )
 
 func (s *contentService) GetAlbumByUser(ownID string, public bool) []models.Content {
