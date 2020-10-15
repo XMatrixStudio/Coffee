@@ -3,8 +3,8 @@ package controllers
 import (
 	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/globalsign/mgo/bson"
-	"github.com/kataras/iris"
 	"github.com/kataras/iris/sessions"
+	"github.com/kataras/iris/v12"
 )
 
 // LikeController Like

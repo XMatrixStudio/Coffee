@@ -1,7 +1,7 @@
 package coffee
 
 import (
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 
 	"time"
 
@@ -12,8 +12,8 @@ import (
 	"github.com/XMatrixStudio/Coffee/App/services"
 	"github.com/XMatrixStudio/Violet.SDK.Go"
 	"github.com/globalsign/mgo/bson"
-	"github.com/kataras/iris/mvc"
-	"github.com/kataras/iris/sessions"
+	"github.com/kataras/iris/v12/mvc"
+	"github.com/kataras/iris/v12/sessions"
 )
 
 // Config 配置文件
@@ -44,7 +44,7 @@ func RunServer(c Config) {
 	// 启动服务器
 	app := iris.New()
 	if c.Server.Dev {
-		app.Logger().SetLevel("debug")
+		// app.Logger().SetLevel("debug")
 	}
 
 	sessionManager := sessions.New(sessions.Config{
@@ -74,7 +74,7 @@ func RunServer(c Config) {
 	content.Handle(new(controllers.ContentController))
 
 	app.Get("file/{fileID: string}/{filePath:string}", func(ctx iris.Context) {
-		s := sessionManager.Start(ctx)
+		s := sessions.Get(ctx)
 		fileID := ctx.Params().Get("fileID")
 		filePath := ctx.Params().Get("filePath")
 		if s.Get("id") == nil {

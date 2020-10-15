@@ -13,7 +13,7 @@ import (
 
 	"github.com/XMatrixStudio/Coffee/App/models"
 	"github.com/globalsign/mgo/bson"
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 )
 
 func (s *contentService) GetAlbumByUser(ownID string, public bool) []models.Content {

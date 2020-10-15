@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/XMatrixStudio/Coffee/App/models"
-	"github.com/kataras/iris"
+	"github.com/kataras/iris/v12"
 )
 
 // ContentService 内容
